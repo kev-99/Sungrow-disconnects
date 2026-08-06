@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 2 disconnection events — 12-14 Richmond Ave — evidence summary</title>
+<style>
+/* ============================================================================
+   ADJUSTABLE ELEMENTS — everything you are likely to want to change is here.
+   Change a value once and it updates everywhere it is used.
+   ========================================================================== */
+:root {
+  /* --- colours ------------------------------------------------------------ */
+  --c-s2:          #c0392b;   /* System 2 (the faulty system) — all red marks  */
+  --c-s1:          #2471a3;   /* System 1 (the healthy comparison) — all blue  */
+  --c-ink:         #1c2430;   /* main body text                                */
+  --c-ink-soft:    #5b6673;   /* secondary text, captions                      */
+  --c-rule:        #d7dde4;   /* hairlines, table borders                      */
+  --c-bg:          #ffffff;   /* page background                               */
+  --c-panel:       #f4f7fa;   /* tinted panel background                       */
+  --c-flag:        #b9770e;   /* amber — "note this" callouts                  */
+  --c-good:        #1e8449;   /* green — confirmed / established               */
+
+  /* --- typography --------------------------------------------------------- */
+  --f-stack: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  --f-base:  10.5pt;          /* body size. 10pt-11pt works well on A4         */
+  --f-huge:  40pt;            /* the big headline numbers in the stat cards    */
+
+  /* --- layout ------------------------------------------------------------- */
+  --w-page:  1100px;          /* max on-screen width                           */
+  --gap:     14px;            /* standard spacing unit                         */
+  --radius:  6px;
+}
+
+/* Page setup for PDF / printing.
+   ADJUSTABLE: change `A4` to `A3` for a larger poster, or `landscape`. */
+@page { size: A4 portrait; margin: 11mm; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: var(--gap);
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--f-stack);
+  font-size: var(--f-base);
+  line-height: 1.45;
+
+  & > .sheet { max-width: var(--w-page); margin: 0 auto; }
+}
+
+/* ---------------------------------------------------------------- masthead */
+.masthead {
+  border-bottom: 3px solid var(--c-ink);
+  padding-bottom: 10px;
+  margin-bottom: var(--gap);
+
+  & .masthead__eyebrow {
+    font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--c-ink-soft); margin: 0 0 4px;
+  }
+  & .masthead__title {
+    font-size: 22pt; line-height: 1.1; margin: 0 0 6px; font-weight: 700;
+  }
+  & .masthead__sub {
+    margin: 0; color: var(--c-ink-soft); font-size: 9.5pt;
+
+    & strong { color: var(--c-ink); }
+  }
+}
+
+/* ------------------------------------------------------------ headline bar */
+.headline {
+  background: var(--c-ink); color: #fff;
+  padding: 12px 16px; border-radius: var(--radius);
+  margin-bottom: var(--gap);
+
+  & .headline__text { margin: 0; font-size: 13pt; font-weight: 600; line-height: 1.35; }
+  & .headline__note { margin: 6px 0 0; font-size: 9pt; opacity: .85; }
+  & em { color: #ff9f93; font-style: normal; font-weight: 700; }
+}
+
+/* -------------------------------------------------------------- stat cards */
+.stats {
+  display: grid;
+  /* ADJUSTABLE: change 4 to 3 or 5 to re-flow the card row */
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+}
+.stat {
+  border: 1px solid var(--c-rule); border-radius: var(--radius);
+  padding: 10px 12px; background: var(--c-panel);
+
+  & .stat__num {
+    font-size: var(--f-huge); font-weight: 700; line-height: 1;
+    color: var(--c-s2); letter-spacing: -.02em;
+  }
+  & .stat__num--s1   { color: var(--c-s1); }
+  & .stat__num--ink  { color: var(--c-ink); }
+  & .stat__label { font-size: 9pt; color: var(--c-ink-soft); margin-top: 4px; display: block; }
+  & .stat__sub   { font-size: 8.5pt; color: var(--c-ink-soft); margin-top: 2px; display: block; }
+}
+
+/* ------------------------------------------------------------- section box */
+.section {
+  border: 1px solid var(--c-rule); border-radius: var(--radius);
+  padding: 12px 14px; margin-bottom: var(--gap);
+  break-inside: avoid;
+
+  & .section__title {
+    font-size: 11.5pt; font-weight: 700; margin: 0 0 8px;
+    padding-bottom: 5px; border-bottom: 2px solid var(--c-rule);
+  }
+  & .section__lead { margin: 0 0 10px; font-size: 9.5pt; color: var(--c-ink-soft); }
+  & p { margin: 0 0 8px; }
+  & p:last-child { margin-bottom: 0; }
+}
+
+.grid2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap);
+  /* ADJUSTABLE: set to `1fr` to stack these panels vertically */
+}
+
+/* ------------------------------------------------------------------ tables */
+.tbl {
+  width: 100%; border-collapse: collapse; font-size: 9pt;
+
+  & th, & td { padding: 4px 6px; border-bottom: 1px solid var(--c-rule); text-align: right; }
+  & th { font-weight: 600; color: var(--c-ink-soft); font-size: 8.5pt;
+         text-transform: uppercase; letter-spacing: .04em; }
+  & th:first-child, & td:first-child { text-align: left; }
+  & tbody tr:last-child td { border-bottom: none; }
+  & .tbl__s2 { color: var(--c-s2); font-weight: 700; }
+  & .tbl__s1 { color: var(--c-s1); }
+  & .tbl__row--hi { background: #fdf3f2; }
+  & .tbl__row--tot td { border-top: 2px solid var(--c-ink); font-weight: 700; }
+}
+
+/* ------------------------------------------------------------------ callout */
+.callout {
+  border-left: 4px solid var(--c-flag);
+  background: #fdf8ef; padding: 9px 12px; border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 9.5pt; margin: 10px 0;
+
+  & .callout__title { font-weight: 700; display: block; margin-bottom: 3px; color: var(--c-flag); }
+  &.callout--good { border-left-color: var(--c-good); background: #f0f8f3;
+                    & .callout__title { color: var(--c-good); } }
+  &.callout--bad  { border-left-color: var(--c-s2);   background: #fdf3f2;
+                    & .callout__title { color: var(--c-s2); } }
+}
+
+/* ------------------------------------------------------------------- chart */
+.chart {
+  & .chart__svg { width: 100%; height: auto; display: block; }
+  & .chart__caption { font-size: 8.5pt; color: var(--c-ink-soft); margin-top: 6px; }
+  & text { font-family: var(--f-stack); }
+}
+
+/* legend */
+.legend {
+  display: flex; gap: 16px; font-size: 8.5pt; color: var(--c-ink-soft);
+  margin-bottom: 6px;
+
+  & .legend__item { display: flex; align-items: center; gap: 5px; }
+  & .legend__swatch { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+}
+
+/* ------------------------------------------------------------- key/value row */
+.kv {
+  display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 9pt;
+
+  & .kv__k { color: var(--c-ink-soft); }
+  & .kv__v { font-weight: 600; }
+}
+
+/* --------------------------------------------------------------- action list */
+.actions {
+  counter-reset: act; list-style: none; padding: 0; margin: 0;
+
+  & .actions__item {
+    counter-increment: act; position: relative;
+    padding: 7px 0 7px 30px; border-bottom: 1px solid var(--c-rule); font-size: 9.5pt;
+
+    &::before {
+      content: counter(act);
+      position: absolute; left: 0; top: 7px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--c-ink); color: #fff;
+      font-size: 8.5pt; font-weight: 700;
+      display: grid; place-items: center;
+    }
+    &:last-child { border-bottom: none; }
+    /* only the leading headline is a block — nested bold inside the
+       explanatory span must stay inline (`>` matters here) */
+    & > strong { display: block; }
+    & > span { color: var(--c-ink-soft); }
+  }
+  & .actions__item--priority::before { background: var(--c-s2); }
+}
+
+/* -------------------------------------------------------------------- footer */
+.footer {
+  border-top: 2px solid var(--c-ink); padding-top: 8px; margin-top: 4px;
+  font-size: 8pt; color: var(--c-ink-soft);
+
+  & .footer__title { font-weight: 700; color: var(--c-ink); font-size: 9pt; margin: 0 0 5px; }
+  & ul { margin: 0; padding-left: 16px; }
+  & li { margin-bottom: 2px; }
+}
+
+/* --------------------------------------------------------------- print rules */
+@media print {
+  body { padding: 0; font-size: 9.5pt; }
+  .section, .stats, .headline { break-inside: avoid; }
+  .page-break { break-before: page; }
+  :root { --f-huge: 32pt; --gap: 10px; }
+}
+
+/* ------------------------------------------------------- narrow screens */
+@media screen and (max-width: 820px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .grid2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="masthead">
+    <p class="masthead__eyebrow">Evidence summary &middot; prepared 6 August 2026</p>
+    <h1 class="masthead__title">System&nbsp;2 disconnection events</h1>
+    <p class="masthead__sub">
+      12-14 Richmond Ave, Dee&nbsp;Why NSW &middot; two identical 26&nbsp;kW Sungrow SH20T systems on one grid connection
+      &middot; <strong>System&nbsp;1 is the comparison throughout</strong> &middot; period analysed
+      <strong>1 July – 5 August 2026</strong>
+    </p>
+  </header>
+
+  <div class="headline">
+    <p class="headline__text">
+      System&nbsp;2 repeatedly stops exporting while its array is generating and the grid is present and normal.
+      It has done so <em>75 times</em> in 36 days. System&nbsp;1, on the same supply, has done so 8 times &mdash;
+      and <em>not once since 24 July</em>.
+    </p>
+    <p class="headline__note">
+      The fault log has recorded nothing since 2 July. Notifications stopped on 25 July.
+      The events did not stop &mdash; the reporting did.
+    </p>
+  </div>
+
+  <!-- ===================================================== headline numbers -->
+  <section class="stats">
+    <div class="stat">
+      <span class="stat__num">75</span>
+      <span class="stat__label">S2 events measured</span>
+      <span class="stat__sub">1 Jul – 5 Aug &middot; S1: 8</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num">~145</span>
+      <span class="stat__label">estimated actual events, July</span>
+      <span class="stat__sub">95% CI 85–205 &middot; see panel 5</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num stat__num--ink">0</span>
+      <span class="stat__label">faults logged since 2 July</span>
+      <span class="stat__sub">none at all in August</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num stat__num--s1">0</span>
+      <span class="stat__label">S1 events since 24 July</span>
+      <span class="stat__sub">S2 in same period: 7</span>
+    </div>
+  </section>
+
+  <!-- ================================================== 1. what an event is -->
+  <section class="section">
+    <h2 class="section__title">1 &nbsp;What an event is &mdash; measured at four independent points</h2>
+    <p class="section__lead">
+      The array generates normally while nothing leaves the inverter on the AC side. The grid is present
+      throughout, measured separately at the switchboard meter.
+    </p>
+    <table class="tbl">
+      <thead>
+        <tr><th>Measurement point</th><th>Normal operation</th><th>During an event</th><th>Verdict</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Array (DC) output</td><td>3 – 16 kW</td><td class="tbl__s2">3 – 15 kW &mdash; unchanged</td><td>still generating</td></tr>
+        <tr><td>Inverter AC output</td><td>2 – 10 kW</td><td class="tbl__s2">0.00 – 0.06 kW</td><td>nothing exported</td></tr>
+        <tr class="tbl__row--hi"><td><strong>Meter / switchboard voltage</strong></td><td>244 – 251 V</td><td><strong>244 – 251 V &mdash; normal</strong></td><td><strong>grid is fine</strong></td></tr>
+        <tr><td>Load served by inverter</td><td>~5,400 W</td><td class="tbl__s2">28 – 120 W</td><td>auxiliaries only</td></tr>
+        <tr><td>Backup (EPS) port voltage</td><td>245 – 250 V</td><td class="tbl__s2">210 – 222 V</td><td>collapsed</td></tr>
+        <tr><td>Backup port frequency</td><td>49.9 – 50.0 Hz</td><td>49.98 – 50.02 Hz</td><td>unchanged</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <span class="callout__title">This is not "islanding"</span>
+      Islanding requires the mains supply to have been lost. The meter reads normal at every single event,
+      so no island can have formed. The accurate description is that
+      <strong>System&nbsp;2 ceases exporting while the grid is present.</strong>
+    </div>
+  </section>
+
+  <!-- =========================================== 2. the rate over the period -->
+  <section class="section chart">
+    <h2 class="section__title">2 &nbsp;The rate fell through July &mdash; then stopped falling</h2>
+    <p class="section__lead">
+      Events per 1,000 <strong>exposed intervals</strong> &mdash; five-minute periods in which the array was
+      generating above 2&nbsp;kW, so an event would have been visible had it occurred. Normalising this way
+      means bright and dull weeks compare fairly.
+    </p>
+
+    <div class="legend">
+      <span class="legend__item"><span class="legend__swatch" style="background:var(--c-s2)"></span>System 2</span>
+      <span class="legend__item"><span class="legend__swatch" style="background:var(--c-s1)"></span>System 1</span>
+    </div>
+
+    <!-- Hand-built SVG bar chart. ADJUSTABLE: the numbers in the data table below
+         the chart are the source of truth; bar heights are derived from a 60.0
+         maximum (see the y-axis labels). -->
+    <svg class="chart__svg" viewBox="0 0 900 260" role="img"
+         aria-label="Bar chart of event rate per 1000 exposed intervals by period">
+      <!-- y grid -->
+      <g stroke="#d7dde4" stroke-width="1">
+        <line x1="58" y1="20"  x2="880" y2="20"/>
+        <line x1="58" y1="70"  x2="880" y2="70"/>
+        <line x1="58" y1="120" x2="880" y2="120"/>
+        <line x1="58" y1="170" x2="880" y2="170"/>
+        <line x1="58" y1="210" x2="880" y2="210" stroke="#1c2430" stroke-width="1.5"/>
+      </g>
+      <g fill="#5b6673" font-size="11" text-anchor="end">
+        <text x="52" y="24">60</text>
+        <text x="52" y="74">45</text>
+        <text x="52" y="124">30</text>
+        <text x="52" y="174">15</text>
+        <text x="52" y="214">0</text>
+      </g>
+
+      <!-- bars: x positions every 140px, S2 then S1 -->
+      <!-- 1-2 Jul: S2 0.00, S1 0.00 -->
+      <g>
+        <rect x="72"  y="210" width="40" height="0"   fill="#c0392b"/>
+        <rect x="114" y="210" width="40" height="0"   fill="#2471a3"/>
+        <text x="113" y="228" font-size="11" text-anchor="middle" fill="#1c2430">1–2 Jul</text>
+        <text x="113" y="242" font-size="10" text-anchor="middle" fill="#5b6673">0.00 / 0.00</text>
+      </g>
+      <!-- 3-14 Jul: S2 54.68 -> 182px, S1 3.75 -> 12.5px -->
+      <g>
+        <rect x="212" y="28"  width="40" height="182" fill="#c0392b"/>
+        <rect x="254" y="197" width="40" height="13"  fill="#2471a3"/>
+        <text x="253" y="228" font-size="11" text-anchor="middle" fill="#1c2430">3–14 Jul</text>
+        <text x="253" y="242" font-size="10" text-anchor="middle" fill="#5b6673">54.7 / 3.8</text>
+        <text x="232" y="22"  font-size="12" text-anchor="middle" fill="#c0392b" font-weight="700">54.7</text>
+      </g>
+      <!-- 15-21 Jul: S2 14.15 -> 47px, S1 3.16 -> 10.5px -->
+      <g>
+        <rect x="352" y="163" width="40" height="47"  fill="#c0392b"/>
+        <rect x="394" y="200" width="40" height="10"  fill="#2471a3"/>
+        <text x="393" y="228" font-size="11" text-anchor="middle" fill="#1c2430">15–21 Jul</text>
+        <text x="393" y="242" font-size="10" text-anchor="middle" fill="#5b6673">14.2 / 3.2</text>
+      </g>
+      <!-- 22-28 Jul: S2 1.44 -> 5px, S1 2.97 -> 10px -->
+      <g>
+        <rect x="492" y="205" width="40" height="5"   fill="#c0392b"/>
+        <rect x="534" y="200" width="40" height="10"  fill="#2471a3"/>
+        <text x="533" y="228" font-size="11" text-anchor="middle" fill="#1c2430">22–28 Jul</text>
+        <text x="533" y="242" font-size="10" text-anchor="middle" fill="#5b6673">1.4 / 3.0</text>
+      </g>
+      <!-- 29-31 Jul: S2 9.77 -> 33px, S1 0 -->
+      <g>
+        <rect x="632" y="177" width="40" height="33"  fill="#c0392b"/>
+        <rect x="674" y="210" width="40" height="0"   fill="#2471a3"/>
+        <text x="673" y="228" font-size="11" text-anchor="middle" fill="#1c2430">29–31 Jul</text>
+        <text x="673" y="242" font-size="10" text-anchor="middle" fill="#5b6673">9.8 / 0.0</text>
+      </g>
+      <!-- 1-5 Aug: S2 6.34 -> 21px, S1 0 -->
+      <g>
+        <rect x="772" y="189" width="40" height="21"  fill="#c0392b"/>
+        <rect x="814" y="210" width="40" height="0"   fill="#2471a3"/>
+        <text x="813" y="228" font-size="11" text-anchor="middle" fill="#1c2430">1–5 Aug</text>
+        <text x="813" y="242" font-size="10" text-anchor="middle" fill="#5b6673">6.3 / 0.0</text>
+      </g>
+    </svg>
+
+    <p class="chart__caption">
+      Rate per 1,000 exposed intervals. System&nbsp;1 recorded <strong>zero</strong> events across both
+      final periods while System&nbsp;2 continued.
+    </p>
+
+    <div class="callout callout--bad">
+      <span class="callout__title">The decline stopped &mdash; it did not reach zero</span>
+      Over <strong>29 July – 5 August</strong>: System&nbsp;2 had 6 events, System&nbsp;1 had 0, from almost
+      identical opportunity (780 vs 761 exposed intervals). One-sided test on that split:
+      <strong>p = 0.017</strong>. The difference in the most recent period is statistically significant,
+      not chance.
+    </div>
+  </section>
+
+  <!-- ======================================= 3. daily strip + time of day -->
+  <div class="grid2">
+    <section class="section chart">
+      <h2 class="section__title">3 &nbsp;The last twelve days</h2>
+      <svg class="chart__svg" viewBox="0 0 420 210" role="img"
+           aria-label="Daily event count for System 2, 25 July to 5 August">
+        <g stroke="#d7dde4"><line x1="34" y1="150" x2="410" y2="150" stroke="#1c2430" stroke-width="1.5"/></g>
+        <g fill="#5b6673" font-size="10" text-anchor="end">
+          <text x="28" y="64">2</text><text x="28" y="107">1</text><text x="28" y="154">0</text>
+        </g>
+        <!-- 12 days, 31px pitch. 1 event = 43px tall -->
+        <g>
+          <rect x="40"  y="150" width="20" height="0"  fill="#c0392b"/>
+          <rect x="71"  y="107" width="20" height="43" fill="#c0392b"/>
+          <rect x="102" y="150" width="20" height="0"  fill="#c0392b"/>
+          <rect x="133" y="150" width="20" height="0"  fill="#c0392b"/>
+          <rect x="164" y="107" width="20" height="43" fill="#c0392b"/>
+          <rect x="195" y="107" width="20" height="43" fill="#c0392b"/>
+          <rect x="226" y="107" width="20" height="43" fill="#c0392b"/>
+          <rect x="257" y="64"  width="20" height="86" fill="#c0392b"/>
+          <rect x="288" y="107" width="20" height="43" fill="#c0392b"/>
+          <rect x="319" y="150" width="20" height="0"  fill="#c0392b"/>
+          <rect x="350" y="150" width="20" height="0"  fill="#c0392b"/>
+          <rect x="381" y="150" width="20" height="0"  fill="#c0392b"/>
+        </g>
+        <g fill="#5b6673" font-size="9" text-anchor="middle">
+          <text x="50"  y="164">25</text><text x="81"  y="164">26</text>
+          <text x="112" y="164">27</text><text x="143" y="164">28</text>
+          <text x="174" y="164">29</text><text x="205" y="164">30</text>
+          <text x="236" y="164">31</text><text x="267" y="164">1</text>
+          <text x="298" y="164">2</text><text x="329" y="164">3</text>
+          <text x="360" y="164">4</text><text x="391" y="164">5</text>
+        </g>
+        <g fill="#1c2430" font-size="10" text-anchor="middle" font-weight="600">
+          <text x="143" y="182">JULY</text><text x="329" y="182">AUGUST</text>
+        </g>
+        <g fill="#2471a3" font-size="10">
+          <text x="40" y="200">System 1: zero events on every one of these days.</text>
+        </g>
+      </svg>
+      <p class="chart__caption">
+        Most recent event <strong>2 August</strong>. The three clear days since are within normal variation
+        at the current rate of ~0.7 events per generating day.
+      </p>
+    </section>
+
+    <section class="section chart">
+      <h2 class="section__title">4 &nbsp;Events happen only 09:00–16:00</h2>
+      <svg class="chart__svg" viewBox="0 0 420 210" role="img"
+           aria-label="Histogram of event times of day">
+        <g><line x1="34" y1="150" x2="410" y2="150" stroke="#1c2430" stroke-width="1.5"/></g>
+        <g fill="#5b6673" font-size="10" text-anchor="end">
+          <text x="28" y="54">16</text><text x="28" y="102">8</text><text x="28" y="154">0</text>
+        </g>
+        <!-- 09..15 = 7 bars, pitch 50. 1 count = 6.1px -->
+        <g fill="#c0392b">
+          <rect x="44"  y="107" width="34" height="43"/>
+          <rect x="94"  y="64"  width="34" height="86"/>
+          <rect x="144" y="83"  width="34" height="67"/>
+          <rect x="194" y="52"  width="34" height="98"/>
+          <rect x="244" y="83"  width="34" height="67"/>
+          <rect x="294" y="95"  width="34" height="55"/>
+          <rect x="344" y="107" width="34" height="43"/>
+        </g>
+        <g fill="#fff" font-size="10" text-anchor="middle" font-weight="700">
+          <text x="61"  y="121">7</text><text x="111" y="78">14</text>
+          <text x="161" y="97">11</text><text x="211" y="66">16</text>
+          <text x="261" y="97">11</text><text x="311" y="109">9</text>
+          <text x="361" y="121">7</text>
+        </g>
+        <g fill="#5b6673" font-size="9.5" text-anchor="middle">
+          <text x="61"  y="164">09</text><text x="111" y="164">10</text>
+          <text x="161" y="164">11</text><text x="211" y="164">12</text>
+          <text x="261" y="164">13</text><text x="311" y="164">14</text>
+          <text x="361" y="164">15</text>
+        </g>
+        <text x="222" y="182" fill="#1c2430" font-size="10" text-anchor="middle" font-weight="600">HOUR OF DAY</text>
+        <text x="34" y="202" fill="#5b6673" font-size="9.5">None before 09:00. None after 16:00.</text>
+      </svg>
+      <p class="chart__caption">
+        Not driven by output level (median array output at events 8,462&nbsp;W vs 8,163&nbsp;W overall) and
+        not by battery state (<strong>SOC at events spans 7% to 99%</strong>).
+      </p>
+    </section>
+  </div>
+
+  <!-- ============================================ 5. the reporting failure -->
+  <section class="section">
+    <h2 class="section__title">5 &nbsp;Both of Sungrow's own reporting channels have failed</h2>
+
+    <div class="grid2">
+      <div>
+        <table class="tbl">
+          <thead><tr><th>Record</th><th>July</th><th>August</th></tr></thead>
+          <tbody>
+            <tr><td>Events measured (S2)</td><td class="tbl__s2">72</td><td class="tbl__s2">3</td></tr>
+            <tr><td>Faults logged</td><td>9 <span style="color:var(--c-ink-soft)">(all 1–2 Jul)</span></td><td><strong>0</strong></td></tr>
+            <tr><td>Off-grid notifications</td><td>17</td><td><strong>0</strong></td></tr>
+            <tr class="tbl__row--tot"><td>Last fault / last notification</td><td colspan="2">2 Jul &middot; 25 Jul</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout--bad">
+          <span class="callout__title">Silence is not health</span>
+          No fault has been logged since <strong>2 July</strong> and no notification issued since
+          <strong>25 July</strong> — across a period containing <strong>75 measured events</strong>,
+          seven of them after the last notification.
+        </div>
+      </div>
+
+      <div>
+        <p style="font-weight:600;margin-bottom:6px;">Two independent records — and they barely overlap</p>
+        <!-- Overlap diagram. ADJUSTABLE: circle radii/positions are fixed; the
+             numbers below are the source of truth. -->
+        <svg class="chart__svg" viewBox="0 0 420 150" role="img"
+             aria-label="Overlap between detector events and notifications">
+          <circle cx="165" cy="72" r="62" fill="#c0392b" fill-opacity=".18" stroke="#c0392b" stroke-width="1.5"/>
+          <circle cx="255" cy="72" r="44" fill="#2471a3" fill-opacity=".18" stroke="#2471a3" stroke-width="1.5"/>
+          <text x="120" y="70" font-size="20" font-weight="700" fill="#c0392b" text-anchor="middle">64</text>
+          <text x="120" y="86" font-size="9"  fill="#5b6673" text-anchor="middle">detector only</text>
+          <text x="210" y="70" font-size="17" font-weight="700" fill="#1c2430" text-anchor="middle">8</text>
+          <text x="210" y="84" font-size="8.5" fill="#5b6673" text-anchor="middle">both</text>
+          <text x="286" y="70" font-size="17" font-weight="700" fill="#2471a3" text-anchor="middle">8</text>
+          <text x="286" y="84" font-size="8.5" fill="#5b6673" text-anchor="middle">notif. only</text>
+          <text x="105" y="140" font-size="9.5" fill="#c0392b" font-weight="600" text-anchor="middle">5-min data: 72</text>
+          <text x="300" y="140" font-size="9.5" fill="#2471a3" font-weight="600" text-anchor="middle">notifications: 17</text>
+        </svg>
+        <div class="callout">
+          <span class="callout__title">Estimated true count: ~145 events in July</span>
+          Two incomplete records of the same events, overlapping on only 8, allow the total to be
+          estimated (capture–recapture): <strong>≈145, 95% CI 85–205</strong>. The five-minute data
+          catches about <strong>half</strong>; the notification channel about <strong>one in nine</strong>.
+          The method under-counts here, so 145 is a floor.
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="callout__title">Notification timestamps are batched — they are not event times</span>
+      All 17 July notifications land on an exact quarter hour (:00, :15, :30, :45) with a seconds value of
+      00 or 01. The chance of that happening naturally is <strong>8&nbsp;×&nbsp;10<sup>−46</sup></strong>.
+      They are a scheduled send; the event lies somewhere in the preceding 15 minutes. Any record quoting
+      these times — including the installer's — describes a window, not a moment.
+    </div>
+  </section>
+
+  <!-- ================================================= 6. what's been ruled out -->
+  <section class="section">
+    <h2 class="section__title">6 &nbsp;What has been ruled out, and what is left</h2>
+    <div class="grid2">
+      <div>
+        <table class="tbl">
+          <thead><tr><th>Possible cause</th><th style="text-align:left">Status</th></tr></thead>
+          <tbody>
+            <tr><td>Grid supply fault</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — meter normal at every event</td></tr>
+            <tr><td>Shared protection relay</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — would trip both systems; S1 unaffected</td></tr>
+            <tr><td>Grid frequency excursion</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — flat 49.93–50.03 Hz, identical to S1</td></tr>
+            <tr><td>Battery state</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — events at SOC 7% through 99%</td></tr>
+            <tr><td>Output level / clipping</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — event output matches normal</td></tr>
+            <tr><td>Simple undervoltage trip</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — 217 V reached on 1 Aug with no disconnection</td></tr>
+            <tr><td>Inverter commanding contactor open</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — DO1/DO2 never change state in 864 intervals</td></tr>
+            <tr class="tbl__row--hi"><td><strong>Inverter internal trip</strong></td><td style="text-align:left"><strong>LIVE</strong></td></tr>
+            <tr class="tbl__row--hi"><td><strong>Contactor circuit fault</strong></td><td style="text-align:left"><strong>LIVE</strong> — coil, aux contact or isolator</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="callout callout--bad">
+          <span class="callout__title">The two remaining causes look identical in all monitoring data</span>
+          An inverter-side internal trip and an uncommanded contactor dropout produce exactly the same
+          signature: meter normal, terminals depressed, backup port collapsed, no fault logged.
+          <strong>No amount of further portal data can separate them.</strong>
+        </div>
+        <div class="callout callout--good">
+          <span class="callout__title">One physical test would separate them</span>
+          Measure the System&nbsp;2 contactor <strong>coil voltage at the coil, under load</strong>, and the
+          <strong>auxiliary contact resistance</strong>. This has never been done. Because the inverter's
+          own command outputs are proven never to operate, this is the only remaining discriminator.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================= 7. actions -->
+  <section class="section">
+    <h2 class="section__title">7 &nbsp;For the site attendance — Friday 14 August 2026</h2>
+    <ol class="actions">
+      <li class="actions__item actions__item--priority">
+        <strong>Test the System 2 contactor coil circuit — coil voltage at the coil under load, and aux contact resistance.</strong>
+        <span>Never performed. The only remaining way to identify the fault. Make this the priority of the visit.</span>
+      </li>
+      <li class="actions__item actions__item--priority">
+        <strong>Do not plan around observing an event on the day.</strong>
+        <span>At ~0.7 events per generating day, a full day on site 09:00–16:00 has about a
+        <strong>51% chance</strong> of catching one; a 10:00–14:00 attendance about 34%.
+        Observing nothing proves nothing. A recording power-quality logger left for 2–3 weeks
+        would be far more informative.</span>
+      </li>
+      <li class="actions__item">
+        <strong>Obtain the inverter-side event log from Sungrow.</strong>
+        <span>Both customer-visible channels are silent while events continue. Protection operations
+        that raise no customer fault should appear in Sungrow's own record.</span>
+      </li>
+      <li class="actions__item">
+        <strong>Obtain, in writing, the protection threshold values before and after 1 July.</strong>
+        <span>Events began 3 July, two days after those settings were changed. Without the values the
+        relationship cannot be assessed.</span>
+      </li>
+      <li class="actions__item">
+        <strong>Ask what stops the inverter exporting without raising a logged fault.</strong>
+        <span>The log has been silent through an estimated ~145 events. Also: why did notifications stop
+        on 25 July while events continued?</span>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ================================================= footer / provenance -->
+  <footer class="footer">
+    <p class="footer__title">Data sources — all portal-generated exports, verified at capture</p>
+    <ul>
+      <li><strong>Daily reports</strong>, 5-minute (PV, Grid, Battery, Load, SOC): 1 Jul – 5 Aug 2026, all 36 days, both systems — <strong>20,736 rows</strong></li>
+      <li><strong>Measuring-point curves</strong>, 5-minute, both systems: 3–5 Jul (22 channels, 19,008 rows); 31 Jul – 2 Aug (12 channels, 10,368 rows); 19–21 Jun validation (3,456 rows)</li>
+      <li><strong>Measuring-point curves</strong>, 15-minute: inverter phase B voltage, 27 Jul – 5 Aug, both systems — 1,920 rows</li>
+      <li><strong>Fault list</strong>, exported CSV: July 2026, both systems — 9 records. August produced no faults, so no export exists</li>
+      <li><strong>Off-grid notifications</strong>: 17 absolute timestamps, July 2026, read from the iSolarCloud phone app. None in August</li>
+      <li><strong>Total analysed: 55,488 five-minute data rows</strong>, plus 9 fault records and 17 notification timestamps</li>
+    </ul>
+    <p style="margin-top:6px">
+      Every figure on this page was verified programmatically against the source files.
+      Detection method: array output above 2 kW with the inverter's Load channel collapsed below 500 W,
+      validated against measuring-point data (21 of 21 confirmed events recovered; zero false positives
+      in a pre-intervention control window).
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
