@@ -11,8 +11,8 @@
    ========================================================================== */
 :root {
   /* --- colours ------------------------------------------------------------ */
-  --c-s2:          #c0392b;   /* System 2 (the faulty system) — all red marks  */
-  --c-s1:          #2471a3;   /* System 1 (the healthy comparison) — all blue  */
+  --c-s2:          #c0392b;   /* System 2 — all red marks                      */
+  --c-s1:          #2471a3;   /* System 1, the comparison — all blue           */
   --c-ink:         #1c2430;   /* main body text                                */
   --c-ink-soft:    #5b6673;   /* secondary text, captions                      */
   --c-rule:        #d7dde4;   /* hairlines, table borders                      */
@@ -20,6 +20,18 @@
   --c-panel:       #f4f7fa;   /* tinted panel background                       */
   --c-flag:        #b9770e;   /* amber — "note this" callouts                  */
   --c-good:        #1e8449;   /* green — confirmed / established               */
+
+  /* --- the two fault modes ------------------------------------------------
+     THE SINGLE SOURCE OF TRUTH for Mode A / Mode B colour. These are used by
+     the mode cards, the inline badges, the table cells, the panel 2 bars and
+     the panel 4 markers. Change here and everything follows EXCEPT the two
+     JS constants C_MODE_A / C_MODE_B at the foot of the file, which must be
+     edited to match (SVG built by script cannot read CSS variables).
+     Mode A is violet, deliberately far from Mode B red, System 1 blue and the
+     amber used for ordinary callouts.                                       */
+  --c-mode-a:      #6f42a5;   /* violet — Mode A, the logged fault             */
+  --c-mode-b:      #c0392b;   /* red — Mode B, the quiet disconnection         */
+  --c-mode-a-bg:   #f3eefa;   /* violet tint, for Mode A card backgrounds      */
 
   /* --- typography --------------------------------------------------------- */
   --f-stack: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
@@ -134,6 +146,8 @@ body {
   & tbody tr:last-child td { border-bottom: none; }
   & .tbl__s2 { color: var(--c-s2); font-weight: 700; }
   & .tbl__s1 { color: var(--c-s1); }
+  /* Mode A cells use the Mode A violet; Mode B cells reuse .tbl__s2 red */
+  & .tbl__a  { color: var(--c-mode-a); font-weight: 700; }
   & .tbl__row--hi { background: #fdf3f2; }
   & .tbl__row--tot td { border-top: 2px solid var(--c-ink); font-weight: 700; }
 }
@@ -149,6 +163,44 @@ body {
                     & .callout__title { color: var(--c-good); } }
   &.callout--bad  { border-left-color: var(--c-s2);   background: #fdf3f2;
                     & .callout__title { color: var(--c-s2); } }
+}
+
+/* -------------------------------------------------- two-mode explainer cards */
+.mode {
+  border: 1px solid var(--c-rule); border-top: 4px solid var(--c-ink-soft);
+  border-radius: var(--radius); padding: 10px 12px; background: var(--c-panel);
+
+  & .mode__tag { display: block; font-weight: 700; font-size: 10pt; margin-bottom: 5px; }
+  & .mode__body { font-size: 9.5pt; margin: 0 0 6px; }
+  & .mode__when { font-size: 9pt; color: var(--c-ink-soft); margin: 0; }
+
+  &.mode--a { border-top-color: var(--c-mode-a); background: var(--c-mode-a-bg);
+              & .mode__tag { color: var(--c-mode-a); } }
+  &.mode--b { border-top-color: var(--c-mode-b); background: #fdf3f2;
+              & .mode__tag { color: var(--c-mode-b); } }
+}
+
+/* ------------------------------------------------------ inline mode badges */
+/* Used in table headers and panel titles so every figure is labelled by mode.
+   ADJUSTABLE: the two colours here are the single source of truth for
+   Mode A (amber) and Mode B (red) across the whole document. */
+.pill {
+  display: inline-block; padding: 1px 6px; border-radius: 9px;
+  font-size: 8pt; font-weight: 700; letter-spacing: .02em;
+  text-transform: none; color: #fff; white-space: nowrap;
+
+  &.pill--a { background: var(--c-mode-a); }
+  &.pill--b { background: var(--c-mode-b); }
+}
+
+/* --------------------------------------------- collapsible supporting detail */
+.detail {
+  margin-top: 12px; border-top: 1px solid var(--c-rule); padding-top: 8px;
+
+  & .detail__summary {
+    cursor: pointer; font-size: 9pt; font-weight: 600; color: var(--c-ink-soft);
+    margin-bottom: 8px;
+  }
 }
 
 /* ------------------------------------------------------------------- chart */
@@ -210,12 +262,142 @@ body {
   & li { margin-bottom: 2px; }
 }
 
+/* ======================================================== HEADLINE SHEET
+   Page 1. A single A4 page that stands alone: the problem, the numbers, the
+   two modes, what has been excluded, and what is being asked for.
+   Everything after it is reference material.
+
+   SIZING — this is the constraint that matters. At A4 with 11 mm margins the
+   printable area is 188 x 275 mm. --hs-scale below multiplies every font size
+   and gap on this sheet only, so if content is added and the page overflows,
+   drop it to 0.95 or 0.92 rather than editing individual values.
+   ====================================================================== */
+.hs {
+  /* THE ONE-PAGE CONTROL. Multiplies every font size on this sheet only.
+     Measured against the 1,039 px A4 printable height (297 mm − 22 mm margins):
+       1.12 -> 1,135 px  OVERFLOWS      1.06 -> 1,061 px  OVERFLOWS
+       1.02 -> 1,000 px  fits, tight    1.00 ->   969 px  fits, 70 px spare
+     1.00 is chosen to leave room for font substitution on other machines.
+     Add content here and you MUST re-measure; lower this value rather than
+     editing individual sizes. */
+  --hs-scale: 1.00;
+  break-after: page;
+
+  & .hs__head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 12px; border-bottom: 3px solid var(--c-ink);
+    padding-bottom: 7px; margin-bottom: 9px;
+  }
+  & .hs__title  { font-size: calc(19pt * var(--hs-scale)); font-weight: 700; margin: 0; line-height: 1.05; }
+  & .hs__eyebrow{ font-size: calc(8pt * var(--hs-scale)); letter-spacing: .14em;
+                  text-transform: uppercase; color: var(--c-ink-soft); margin: 0 0 3px; }
+  & .hs__site   { font-size: calc(8.5pt * var(--hs-scale)); color: var(--c-ink-soft);
+                  margin: 0; text-align: right; max-width: 46%; line-height: 1.35;
+                  & strong { color: var(--c-ink); } }
+
+  /* the one-sentence statement */
+  & .hs__lede {
+    background: var(--c-ink); color: #fff; border-radius: var(--radius);
+    padding: 10px 13px; margin-bottom: 9px;
+    font-size: calc(11.5pt * var(--hs-scale)); font-weight: 600; line-height: 1.32;
+
+    & em { color: #ff9f93; font-style: normal; font-weight: 700; }
+    & .hs__lede-note { display: block; margin-top: 5px; font-weight: 400;
+                       font-size: calc(8.5pt * var(--hs-scale)); opacity: .88; }
+  }
+
+  /* four numbers */
+  & .hs__nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 9px; }
+  & .hs__num {
+    border: 1px solid var(--c-rule); border-radius: var(--radius);
+    padding: 7px 9px; background: var(--c-panel);
+
+    & b { display: block; font-size: calc(26pt * var(--hs-scale)); font-weight: 700;
+          line-height: 1; letter-spacing: -.02em; color: var(--c-mode-b); }
+    & b.is-ink   { color: var(--c-ink); }
+    & b.is-modea { color: var(--c-mode-a); }
+    & span { display: block; font-size: calc(8pt * var(--hs-scale));
+             color: var(--c-ink-soft); margin-top: 3px; line-height: 1.25; }
+  }
+
+  /* the two modes, side by side and very compact */
+  & .hs__modes { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 9px; }
+  & .hs__mode {
+    border: 1px solid var(--c-rule); border-top: 3px solid; border-radius: var(--radius);
+    padding: 7px 10px; font-size: calc(8.5pt * var(--hs-scale)); line-height: 1.35;
+
+    & b { display: block; font-size: calc(9.5pt * var(--hs-scale)); margin-bottom: 3px; }
+    & i { font-style: normal; color: var(--c-ink-soft); }
+    &.is-a { border-top-color: var(--c-mode-a); background: var(--c-mode-a-bg);
+             & b { color: var(--c-mode-a); } }
+    &.is-b { border-top-color: var(--c-mode-b); background: #fdf3f2;
+             & b { color: var(--c-mode-b); } }
+  }
+
+  & .hs__band { margin-bottom: 9px;
+    & svg { width: 100%; height: auto; display: block; }
+    & figcaption { font-size: calc(7.8pt * var(--hs-scale)); color: var(--c-ink-soft); margin-top: 3px; }
+  }
+
+  /* Running states. Deliberately NOT violet or red — this is a configuration
+     difference between the two inverters, on a different axis from Mode A / B,
+     and must not be mistaken for one of them. Uses System 1 blue. */
+  & .hs__states {
+    border: 1px solid var(--c-rule); border-left: 4px solid var(--c-s1);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: #eef4fa; padding: 7px 11px; margin-bottom: 9px;
+    font-size: calc(8.3pt * var(--hs-scale)); line-height: 1.4;
+
+    & b { color: var(--c-s1); }
+    & .hs__states-h { display: block; font-weight: 700; color: var(--c-ink);
+                      font-size: calc(9pt * var(--hs-scale)); margin-bottom: 3px; }
+    & code { font-family: inherit; font-weight: 700; }
+  }
+
+  /* bottom two columns */
+  & .hs__cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  & .hs__colh {
+    font-size: calc(9pt * var(--hs-scale)); font-weight: 700; margin: 0 0 5px;
+    padding-bottom: 3px; border-bottom: 2px solid var(--c-rule);
+  }
+  & .hs__list { margin: 0; padding: 0; list-style: none;
+                font-size: calc(8.3pt * var(--hs-scale)); line-height: 1.4;
+
+    & li { padding: 2.5px 0 2.5px 15px; position: relative; }
+    & li::before { content: "—"; position: absolute; left: 0; color: var(--c-ink-soft); }
+    & li.is-out::before  { content: "\2713"; color: var(--c-good); font-weight: 700; }
+    & li.is-live::before { content: "\25B6"; color: var(--c-mode-b); font-size: .8em; top: 4px; }
+    & li.is-ask::before  { counter-increment: ask; content: counter(ask);
+                           font-weight: 700; color: #fff; background: var(--c-ink);
+                           width: 12px; height: 12px; border-radius: 50%;
+                           font-size: 7pt; display: grid; place-items: center; top: 4px; }
+  }
+  & .hs__asks { counter-reset: ask; }
+
+  & .hs__foot {
+    margin-top: 9px; padding-top: 6px; border-top: 2px solid var(--c-ink);
+    font-size: calc(7.8pt * var(--hs-scale)); color: var(--c-ink-soft);
+    display: flex; justify-content: space-between; gap: 10px;
+  }
+}
+
+/* slim banner that opens the reference section on page 2 */
+.refbar {
+  border: 1px solid var(--c-rule); border-left: 5px solid var(--c-ink);
+  border-radius: var(--radius); padding: 8px 12px; margin-bottom: var(--gap);
+  background: var(--c-panel); font-size: 9pt; color: var(--c-ink-soft);
+
+  & b { display: block; color: var(--c-ink); font-size: 11pt; margin-bottom: 2px; }
+}
+
 /* --------------------------------------------------------------- print rules */
 @media print {
   body { padding: 0; font-size: 9.5pt; }
   .section, .stats, .headline { break-inside: avoid; }
   .page-break { break-before: page; }
   :root { --f-huge: 32pt; --gap: 10px; }
+  /* the headline sheet must never split */
+  .hs { break-inside: avoid; break-after: page; }
 }
 
 /* ------------------------------------------------------- narrow screens */
@@ -228,286 +410,579 @@ body {
 <body>
 <div class="sheet">
 
-  <header class="masthead">
-    <p class="masthead__eyebrow">Evidence summary &middot; prepared 6 August 2026</p>
-    <h1 class="masthead__title">System&nbsp;2 disconnection events</h1>
-    <p class="masthead__sub">
-      12-14 Richmond Ave, Dee&nbsp;Why NSW &middot; two identical 26&nbsp;kW Sungrow SH20T systems on one grid connection
-      &middot; <strong>System&nbsp;1 is the comparison throughout</strong> &middot; period analysed
-      <strong>1 July – 5 August 2026</strong>
-    </p>
-  </header>
+  <!-- =========================================================================
+       PAGE 1 — HEADLINE SHEET. Stands alone. Everything after it is reference.
+       ====================================================================== -->
+  <section class="hs">
 
-  <div class="headline">
-    <p class="headline__text">
-      System&nbsp;2 repeatedly stops exporting while its array is generating and the grid is present and normal.
-      It has done so <em>75 times</em> in 36 days. System&nbsp;1, on the same supply, has done so 8 times &mdash;
-      and <em>not once since 24 July</em>.
-    </p>
-    <p class="headline__note">
-      The fault log has recorded nothing since 2 July. Notifications stopped on 25 July.
-      The events did not stop &mdash; the reporting did.
-    </p>
-  </div>
+    <header class="hs__head">
+      <div>
+        <p class="hs__eyebrow">Headline sheet &middot; site attendance, Friday 14 August 2026</p>
+        <h1 class="hs__title">System&nbsp;2 disconnection events</h1>
+      </div>
+      <p class="hs__site">
+        <strong>12-14 Richmond Ave, Dee&nbsp;Why NSW</strong><br>
+        Two identical 20&nbsp;kW Sungrow SH20T inverters, 26&nbsp;kW array each, one grid connection.
+        <strong>System&nbsp;1 is the comparison throughout.</strong><br>
+        Measured period <strong>1 July – 12 August 2026</strong>
+      </p>
+    </header>
 
-  <!-- ===================================================== headline numbers -->
-  <section class="stats">
-    <div class="stat">
-      <span class="stat__num">75</span>
-      <span class="stat__label">S2 events measured</span>
-      <span class="stat__sub">1 Jul – 5 Aug &middot; S1: 8</span>
+    <div class="hs__lede">
+      System&nbsp;2 stops delivering power while its array is generating and the grid is present and
+      normal. It has done so <em>81 times</em> in 43 days. System&nbsp;1, on the same supply and to the
+      same specification, has done so <em>9 times</em>.
+      <span class="hs__lede-note">
+        The behaviour shows itself in <strong>two different ways, and which one dominates has changed
+        twice</strong> &mdash; on 3 July and again on 12 August. Only one of the two leaves any record in
+        the fault log, which is why the monitoring record understates it. This sheet states what has been
+        measured; the panels that follow give the working, the sources and the exclusions.
+      </span>
     </div>
-    <div class="stat">
-      <span class="stat__num">~145</span>
-      <span class="stat__label">estimated actual events, July</span>
-      <span class="stat__sub">95% CI 85–205 &middot; see panel 5</span>
+
+    <div class="hs__nums">
+      <div class="hs__num">
+        <b>81</b><span><strong>Mode&nbsp;B events on System&nbsp;2</strong><br>1 Jul – 12 Aug &middot; System&nbsp;1: 9</span>
+      </div>
+      <div class="hs__num">
+        <b>8&times;</b><span><strong>increase from 3 July</strong><br>2.6 &rarr; 21.4 per 1,000 chances</span>
+      </div>
+      <div class="hs__num">
+        <b class="is-modea">10</b><span><strong>faults logged 12 August</strong><br>first since 2 July &middot; all System&nbsp;2</span>
+      </div>
+      <div class="hs__num">
+        <b class="is-ink">~½</b><span><strong>of events the 5-min data sees</strong><br>confirmed two independent ways</span>
+      </div>
     </div>
-    <div class="stat">
-      <span class="stat__num stat__num--ink">0</span>
-      <span class="stat__label">faults logged since 2 July</span>
-      <span class="stat__sub">none at all in August</span>
+
+    <div class="hs__modes">
+      <div class="hs__mode is-a">
+        <b>Mode A &mdash; it trips, and it tells you</b>
+        Code&nbsp;10 "Grid power outage", then code&nbsp;329 seconds later; clears in under a minute.
+        <strong>The inverter keeps serving the building.</strong> Logged to the second.<br>
+        <i>96 records to 2 July &middot; <strong>zero for 40 days</strong> &middot; 5 on 12 August</i>
+      </div>
+      <div class="hs__mode is-b">
+        <b>Mode B &mdash; it drops out quietly</b>
+        AC output falls to <strong>0.00&nbsp;kW</strong> with the array generating and the meter normal.
+        <strong>The building loses its solar.</strong> Nothing is logged at all.<br>
+        <i>81 events 3 Jul – 10 Aug &middot; present but rare before that</i>
+      </div>
     </div>
-    <div class="stat">
-      <span class="stat__num stat__num--s1">0</span>
-      <span class="stat__label">S1 events since 24 July</span>
-      <span class="stat__sub">S2 in same period: 7</span>
+
+    <figure class="hs__band">
+      <svg viewBox="0 0 980 120" role="img"
+           aria-label="Mode A dominant 1 June to 2 July, Mode B dominant 3 July to 10 August, Mode A returning 12 August">
+        <text x="0" y="30" font-size="12" font-weight="700" fill="#6f42a5">Mode A</text>
+        <text x="0" y="76" font-size="12" font-weight="700" fill="#c0392b">Mode B</text>
+        <rect x="86" y="14" width="844" height="26" fill="#f4f7fa"/>
+        <rect x="86" y="60" width="844" height="26" fill="#f4f7fa"/>
+        <rect x="86"  y="14" width="354" height="26" rx="3" fill="#6f42a5"/>
+        <rect x="907" y="14" width="23"  height="26" rx="3" fill="#6f42a5"/>
+        <text x="263" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">96 logged faults</text>
+        <text x="674" y="31" font-size="10" font-weight="700" fill="#6f42a5" text-anchor="middle">ZERO in 40 days</text>
+        <rect x="86"  y="76" width="354" height="10" rx="2" fill="#c0392b" fill-opacity=".45"/>
+        <rect x="453" y="60" width="431" height="26" rx="3" fill="#c0392b"/>
+        <text x="263" y="74" font-size="10" font-weight="700" fill="#c0392b" text-anchor="middle">rare — 2.6 per 1,000</text>
+        <text x="668" y="77" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">81 events — 21.4 per 1,000</text>
+        <line x1="446" y1="8" x2="446" y2="94" stroke="#1c2430" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <line x1="900" y1="8" x2="900" y2="94" stroke="#1c2430" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="446" y="105" font-size="9" font-weight="700" text-anchor="middle" fill="#1c2430">3 Jul</text>
+        <text x="930" y="105" font-size="9" font-weight="700" text-anchor="end" fill="#1c2430">12 Aug</text>
+        <text x="86"  y="105" font-size="9" fill="#5b6673">1 Jun</text>
+      </svg>
+      <figcaption>
+        Bar height shows how active each mode was. The two <strong>trade places</strong> rather than
+        switching cleanly on and off &mdash; and they have never both appeared in a single measurement.
+        (Panel&nbsp;1.)
+      </figcaption>
+    </figure>
+
+    <div class="hs__states">
+      <span class="hs__states-h">Separately &mdash; the two inverters are in different running states</span>
+      The device pages report <b>System&nbsp;1: "Dispatched running"</b> and
+      <b>System&nbsp;2: "Grid-connected operation"</b>. Sungrow's own protocol defines
+      <code>Dispatch&nbsp;Running</code> (register 13000, <code>0x8200</code>) as
+      <em>"the inverter runs according to the scheduling instructions received from the monitoring
+      background. The active power is set to less than 100%."</em> &mdash; a <strong>curtailment
+      state</strong>. Same model, same firmware, one connection. <strong>This is not offered as the cause:
+      it is System&nbsp;1, the system that is <em>not</em> disconnecting, that is capped.</strong> But it
+      breaks the "identically configured" premise the whole comparison rests on.
+      <strong>Please read registers 13000 and 13050 locally on both units</strong> &mdash; the app is
+      documented to misreport EMS mode, so the portal cannot settle it. (Panel&nbsp;6.)
+    </div>
+
+    <div class="hs__cols">
+      <div>
+        <p class="hs__colh">What the data already excludes</p>
+        <ul class="hs__list">
+          <li class="is-out"><strong>Grid supply</strong> — meter normal at every event; System&nbsp;1, same connection, kept running</li>
+          <li class="is-out"><strong>Shared protection relay</strong> — would trip both systems; System&nbsp;1 unaffected</li>
+          <li class="is-out"><strong>Frequency excursion</strong> — flat 49.93–50.03&nbsp;Hz, identical to System&nbsp;1</li>
+          <li class="is-out"><strong>Battery state</strong> — events at 7% through 99% SOC</li>
+          <li class="is-out"><strong>Output level / clipping</strong> — event output matches normal</li>
+          <li class="is-out"><strong>Simple undervoltage trip</strong> — 217&nbsp;V reached 1 Aug with no disconnection</li>
+          <li class="is-out"><strong>Inverter commanding a contactor open</strong> — DO1/DO2 never change state in 864 intervals</li>
+          <li class="is-live"><strong>Still live:</strong> an inverter-side internal trip, <em>or</em> an intermittent fault in K2's coil circuit, aux contact or isolator. <strong>These two look identical in every monitoring channel.</strong></li>
+        </ul>
+      </div>
+      <div class="hs__asks">
+        <p class="hs__colh">What would settle it &mdash; asks for the day</p>
+        <ul class="hs__list">
+          <li class="is-ask"><strong>Test the System&nbsp;2 contactor coil circuit</strong> — coil voltage measured <em>at the coil under load</em>, plus aux contact resistance. Never done, and the only remaining way to separate the two live candidates. <strong>The priority of the visit.</strong></li>
+          <li class="is-ask"><strong>Tell us what determines which mode the inverter is in.</strong> Nothing is known to have changed at the site, yet the behaviour switched twice. An answer here likely explains both.</li>
+          <li class="is-ask"><strong>Share the inverter-side event log</strong>, and make the <strong>10-second data exportable</strong>. The inverter records at the resolution needed; the export path returns 15-minute data.</li>
+          <li class="is-ask"><strong>Confirm the protection thresholds before and after 1 July</strong>, in writing. The step change falls two days after that work.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="hs__foot">
+      <span><strong>Evidence base:</strong> 61,824 five-minute rows from portal exports, 43 days both systems, plus 19 fault records and 20 notification timestamps. Every figure verified against source.</span>
+      <span style="text-align:right;white-space:nowrap"><strong>Detail overleaf &mdash; panels 1–10</strong></span>
     </div>
   </section>
 
-  <!-- ================================================== 1. what an event is -->
+  <div class="refbar">
+    <b>Reference detail &mdash; panels 1 to 10</b>
+    Working, sources, exclusions and the full measurement record behind every figure on the headline
+    sheet. Each panel that concerns one mode carries a coloured badge.
+  </div>
+
+  <!-- ============================= 1. what happens — one issue, two modes -->
   <section class="section">
-    <h2 class="section__title">1 &nbsp;What an event is &mdash; measured at four independent points</h2>
+    <h2 class="section__title">1 &nbsp;What happens &mdash; and the two ways it shows itself</h2>
     <p class="section__lead">
-      The array generates normally while nothing leaves the inverter on the AC side. The grid is present
-      throughout, measured separately at the switchboard meter.
+      System&nbsp;2 has been seen behaving in <strong>two distinct ways</strong>. Both have been present
+      since the record begins, but <strong>which one dominates has changed twice</strong> &mdash; on
+      3&nbsp;July and again on 12&nbsp;August. The two look completely different in the measurements, and
+      <strong>only one of them leaves a record in the fault log</strong>. Everything else in this summary is
+      labelled by mode so it is always clear which is meant.
+    </p>
+
+    <!-- ---------------------------------------------------- two-mode explainer -->
+    <div class="grid2">
+      <div class="mode mode--a">
+        <span class="mode__tag">Mode A &mdash; it trips, and it tells you</span>
+        <p class="mode__body">
+          The inverter reports a <strong>"Grid power outage" (code 10)</strong>, followed 7&ndash;9 seconds
+          later by a <strong>"System fault" (code 329)</strong>, and clears itself in under a minute.
+          <strong>The building keeps its solar</strong> &mdash; the inverter goes on serving the load
+          throughout. Every occurrence is <strong>timestamped to the second in the portal fault log</strong>.
+        </p>
+        <p class="mode__when"><strong>Dominant:</strong> 1 June – 2 July — <strong>96 code-10 records on 21 days</strong> &nbsp;·&nbsp; returned on <strong>12 August</strong> (5 records)<br>
+        <strong>Absent:</strong> 3 July – 11 August — <strong>zero records in 40 days</strong></p>
+      </div>
+      <div class="mode mode--b">
+        <span class="mode__tag">Mode B &mdash; it drops out quietly</span>
+        <p class="mode__body">
+          AC output falls to <strong>0.00&nbsp;kW while the array is still generating and the grid meter reads
+          normal</strong>. <strong>The building's solar supply stops</strong> until it recovers, typically
+          within a few minutes. <strong>Nothing is written to the fault log at all</strong> &mdash; it is only
+          visible in the measurement channels.
+        </p>
+        <p class="mode__when"><strong>Dominant:</strong> 3 July – 10 August — <strong>81 events, 21.4 per 1,000 chances</strong><br>
+        <strong>Present but rare before that:</strong> 9 events in the 48 days from 14 May, <strong>2.6 per 1,000</strong> — an eightfold difference</p>
+      </div>
+    </div>
+
+    <!-- ---------------------------------------------- the measurement signature -->
+    <p style="font-weight:600;margin:14px 0 6px">
+      The same six measurement points, in each state
     </p>
     <table class="tbl">
       <thead>
-        <tr><th>Measurement point</th><th>Normal operation</th><th>During an event</th><th>Verdict</th></tr>
+        <tr>
+          <th>Measurement point</th>
+          <th>Normal operation</th>
+          <th><span class="pill pill--a">Mode A</span> during a logged fault</th>
+          <th><span class="pill pill--b">Mode B</span> during a quiet disconnection</th>
+        </tr>
       </thead>
       <tbody>
-        <tr><td>Array (DC) output</td><td>3 – 16 kW</td><td class="tbl__s2">3 – 15 kW &mdash; unchanged</td><td>still generating</td></tr>
-        <tr><td>Inverter AC output</td><td>2 – 10 kW</td><td class="tbl__s2">0.00 – 0.06 kW</td><td>nothing exported</td></tr>
-        <tr class="tbl__row--hi"><td><strong>Meter / switchboard voltage</strong></td><td>244 – 251 V</td><td><strong>244 – 251 V &mdash; normal</strong></td><td><strong>grid is fine</strong></td></tr>
-        <tr><td>Load served by inverter</td><td>~5,400 W</td><td class="tbl__s2">28 – 120 W</td><td>auxiliaries only</td></tr>
-        <tr><td>Backup (EPS) port voltage</td><td>245 – 250 V</td><td class="tbl__s2">210 – 222 V</td><td>collapsed</td></tr>
-        <tr><td>Backup port frequency</td><td>49.9 – 50.0 Hz</td><td>49.98 – 50.02 Hz</td><td>unchanged</td></tr>
+        <tr>
+          <td>Array (DC) output</td><td>3 – 16 kW</td>
+          <td class="tbl__a">2.3 – 13.4 kW — generating</td>
+          <td class="tbl__s2">3 – 15 kW — generating <em>(events also occur below 2 kW)</em></td>
+        </tr>
+        <tr>
+          <td><strong>Inverter AC output</strong></td><td>2 – 10 kW</td>
+          <td class="tbl__a"><strong>not zero — still exporting</strong></td>
+          <td class="tbl__s2"><strong>0.00 – 0.06 kW — nothing leaves</strong></td>
+        </tr>
+        <tr class="tbl__row--hi">
+          <td><strong>Meter / switchboard voltage</strong></td><td>242 – 251 V</td>
+          <td><strong>normal</strong></td>
+          <td><strong>241 – 251 V — normal</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Load served by inverter</strong></td><td>~5,400 W</td>
+          <td class="tbl__a"><strong>2,875 – 16,005 W — normal</strong></td>
+          <td class="tbl__s2"><strong>28 – 120 W — auxiliaries only</strong></td>
+        </tr>
+        <tr>
+          <td>Backup (EPS) port voltage</td><td>238 – 250 V</td>
+          <td class="tbl__a">243.9 – 250.5 V — normal</td>
+          <td class="tbl__s2">208 – 222 V — collapsed</td>
+        </tr>
+        <tr>
+          <td>Backup port frequency</td><td>49.9 – 50.0 Hz</td>
+          <td>unchanged</td>
+          <td>49.98 – 50.02 Hz — unchanged</td>
+        </tr>
+        <tr class="tbl__row--tot">
+          <td><strong>Appears in the fault log?</strong></td><td>—</td>
+          <td class="tbl__a"><strong>YES — to the second</strong></td>
+          <td class="tbl__s2"><strong>NO — no record at all</strong></td>
+        </tr>
       </tbody>
     </table>
+    <p class="chart__caption" style="margin-top:8px">
+      Mode&nbsp;A figures are from the <strong>16 five-minute samples that fall strictly inside a logged
+      fault window with the array above 2&nbsp;kW</strong> (June and 1 July). Mode&nbsp;B figures are from the
+      measuring-point exports covering confirmed events on 3–5 July, 31 July – 2 August and 10 August.
+      <strong>The decisive row is "Load served"</strong>: in Mode&nbsp;A the inverter never stops serving the
+      building; in Mode&nbsp;B it drops to auxiliary draw only.
+    </p>
+
     <div class="callout">
-      <span class="callout__title">This is not "islanding"</span>
-      Islanding requires the mains supply to have been lost. The meter reads normal at every single event,
-      so no island can have formed. The accurate description is that
-      <strong>System&nbsp;2 ceases exporting while the grid is present.</strong>
+      <span class="callout__title">Neither mode is "islanding"</span>
+      Islanding requires the mains supply to have been lost. <strong>The meter reads normal at every event in
+      both modes</strong>, so no island can have formed. The accurate description of Mode&nbsp;B is that
+      <strong>System&nbsp;2 ceases exporting while the grid is present</strong>; Mode&nbsp;A is an inverter
+      fault raised and cleared while the grid is present.
     </div>
+
+    <!-- ---------------------------------------------------- mode-switch timeline -->
+    <div class="chart" style="margin-top:12px">
+      <svg class="chart__svg" viewBox="0 0 980 190" role="img"
+           aria-label="Timeline showing Mode A dominant from 1 June to 2 July, Mode B dominant from 3 July to 10 August, and Mode A returning on 12 August. Bar height shows how active each mode was.">
+        <!-- ADJUSTABLE: 1 June sits at x = 90 and 13 August at x = 930, so one day
+             is about 11.4 px. Bar HEIGHT shows activity level: a full-height bar is
+             the dominant mode, a short bar is a low background rate, no bar is zero. -->
+        <text x="0" y="40" font-size="11" font-weight="700" fill="#6f42a5">Mode A</text>
+        <text x="0" y="54" font-size="9" fill="#5b6673">logged</text>
+        <text x="0" y="104" font-size="11" font-weight="700" fill="#c0392b">Mode B</text>
+        <text x="0" y="118" font-size="9" fill="#5b6673">silent</text>
+
+        <!-- lane backgrounds -->
+        <rect x="90" y="24" width="840" height="30" fill="#f4f7fa"/>
+        <rect x="90" y="88" width="840" height="30" fill="#f4f7fa"/>
+
+        <!-- Mode A: dominant 1 Jun – 2 Jul, ZERO 3 Jul – 11 Aug, returns 12 Aug -->
+        <rect x="90"  y="24" width="352" height="30" rx="3" fill="#6f42a5"/>
+        <rect x="907" y="24" width="23"  height="30" rx="3" fill="#6f42a5"/>
+        <text x="266" y="44" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">96 records on 21 days</text>
+        <text x="675" y="44" font-size="9" font-weight="700" fill="#6f42a5" text-anchor="middle">ZERO records in 40 days</text>
+
+        <!-- Mode B: present but rare before 3 Jul (short bar), dominant after -->
+        <rect x="90"  y="108" width="352" height="10" rx="2" fill="#c0392b" fill-opacity=".45"/>
+        <rect x="453" y="88"  width="431" height="30" rx="3" fill="#c0392b"/>
+        <text x="266" y="104" font-size="9" font-weight="700" fill="#c0392b" text-anchor="middle">present but rare — 4 events, 2.0 per 1,000</text>
+        <text x="668" y="108" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">81 events — 21.4 per 1,000</text>
+
+        <!-- switch markers -->
+        <line x1="447" y1="18" x2="447" y2="128" stroke="#1c2430" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <line x1="900" y1="18" x2="900" y2="128" stroke="#1c2430" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="447" y="14" font-size="9" font-weight="700" text-anchor="middle" fill="#1c2430">changeover · 3 Jul</text>
+        <text x="893" y="14" font-size="9" font-weight="700" text-anchor="end" fill="#1c2430">changeover · 12 Aug</text>
+
+        <!-- axis -->
+        <line x1="90" y1="134" x2="930" y2="134" stroke="#d7dde4"/>
+        <text x="90"  y="150" font-size="9" fill="#5b6673">1 Jun</text>
+        <text x="430" y="150" font-size="9" fill="#5b6673">1 Jul</text>
+        <text x="782" y="150" font-size="9" fill="#5b6673">1 Aug</text>
+        <text x="930" y="150" font-size="9" text-anchor="end" fill="#5b6673">13 Aug</text>
+
+        <text x="90" y="174" font-size="9.5" fill="#5b6673">
+          Bar height shows how active each mode was. The modes swap dominance — they do not switch cleanly on and off.
+        </text>
+      </svg>
+      <p class="chart__caption">
+        <strong>Stated precisely, because the distinction matters.</strong> Mode&nbsp;B was <em>present but
+        rare</em> through June &mdash; 4 events, 2.0 per 1,000 chances &mdash; and across the whole
+        pre-July record (14 May – 30 June) 9 events at 2.6 per 1,000. It then rose to 21.4, an
+        <strong>eightfold increase</strong>. Mode&nbsp;A is the cleaner signal: 96 records over 21 days to
+        2 July, then <strong>exactly zero for 40 days</strong>, then a return.
+        The chart starts at 1 June because <strong>no fault list exists before then</strong>, so May cannot
+        be classified by mode at all.
+      </p>
+    </div>
+
+    <!-- ---------------------------------------------------- why one issue -->
+    <div class="grid2" style="margin-top:12px">
+      <div>
+        <table class="tbl">
+          <thead><tr><th>What we checked</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>5-min samples inside a logged fault that show the Mode&nbsp;B signature</td><td><strong>0 of 22</strong></td></tr>
+            <tr><td>Counted Mode&nbsp;B events that carry a logged fault</td><td><strong>0 of 81</strong></td></tr>
+            <tr class="tbl__row--hi"><td>Days with Mode&nbsp;A only</td><td><strong>19</strong></td></tr>
+            <tr class="tbl__row--hi"><td>Days with Mode&nbsp;B only</td><td><strong>28</strong></td></tr>
+            <tr><td>Days with both</td><td><strong>3</strong></td></tr>
+            <tr><td>Day-to-day correlation between the two</td><td><strong>r = &minus;0.23</strong></td></tr>
+            <tr class="tbl__row--tot"><td>Mode&nbsp;A records during Mode&nbsp;B's 40-day run</td><td><strong>0</strong></td></tr>
+          </tbody>
+        </table>
+        <p class="chart__caption" style="margin-top:8px">
+          Day counts are over <strong>1 June – 12 August, 73 days</strong> &mdash; the window in which both
+          records exist. The first two rows are the strongest evidence: <strong>the two signatures have never
+          been seen in the same measurement</strong>. At day level the separation is strong but not absolute
+          &mdash; three days carry both &mdash; so the fair description is that the two behaviours
+          <strong>trade places rather than adding up</strong>. We would welcome a view on whether the
+          inverter's own logic could produce that.
+        </p>
+      </div>
+
+      <div>
+        <div class="callout">
+          <span class="callout__title">Why this matters for the numbers in this pack</span>
+          The 81-event count is built to recognise <strong>Mode&nbsp;B</strong>. On 12 August &mdash; a day
+          with ten logged faults &mdash; <strong>it correctly returns zero</strong>, because the system was in
+          Mode&nbsp;A. So the 81 events, the ~145 July estimate and the rates per 1,000 should all be read as
+          <strong>a measure of Mode&nbsp;B, not of overall system health</strong>.
+        </div>
+        <div class="callout">
+          <span class="callout__title">12 August in detail &mdash; the complete day</span>
+          <strong>10 fault records on System&nbsp;2, none on System&nbsp;1.</strong> Five identical
+          code-10&nbsp;/&nbsp;code-329 pairs between 11:09 and 12:37, durations 12&ndash;59&nbsp;s.
+          System&nbsp;1 was generating <strong>14.9&ndash;21.6&nbsp;kW at every one of those moments</strong>,
+          so the shared grid protection did not operate. Counted Mode&nbsp;B events: <strong>0 on
+          System&nbsp;2</strong>, 1 on System&nbsp;1. Two PV dropouts also returned after 40 days &mdash;
+          <em>a known phenomenon seen on both systems (78 S2 / 68 S1 since May), so a recurrence rather than
+          something new</em>.
+        </div>
+        <div class="callout callout--good">
+          <span class="callout__title">The most useful question we can ask together</span>
+          Nothing is known to have been changed at the site, yet the behaviour switched on 3&nbsp;July and
+          switched back on 12&nbsp;August. <strong>What determines which mode the inverter is in?</strong>
+          An answer to that would very likely identify the underlying cause of both.
+        </div>
+      </div>
+    </div>
+
+    <details class="detail" open>
+      <summary class="detail__summary">Mode A in full &mdash; the ten fault records of 12 August, as exported</summary>
+      <table class="tbl">
+        <thead><tr><th>Code</th><th>Occurred</th><th>Recovered</th><th>Duration</th></tr></thead>
+        <tbody>
+          <tr><td>10</td><td>11:09:00</td><td>11:09:57</td><td>57 s</td></tr>
+          <tr><td>329</td><td>11:09:07</td><td>11:10:06</td><td>59 s</td></tr>
+          <tr class="tbl__row--hi"><td>10</td><td>11:32:13</td><td>11:32:28</td><td>15 s</td></tr>
+          <tr class="tbl__row--hi"><td>329</td><td>11:32:22</td><td>11:32:34</td><td>12 s</td></tr>
+          <tr><td>10</td><td>12:18:14</td><td>12:19:12</td><td>58 s</td></tr>
+          <tr><td>329</td><td>12:18:22</td><td>12:19:17</td><td>55 s</td></tr>
+          <tr class="tbl__row--hi"><td>10</td><td>12:24:15</td><td>12:25:13</td><td>58 s</td></tr>
+          <tr class="tbl__row--hi"><td>329</td><td>12:24:23</td><td>12:25:17</td><td>54 s</td></tr>
+          <tr><td>10</td><td>12:36:21</td><td>12:37:19</td><td>58 s</td></tr>
+          <tr><td>329</td><td>12:36:30</td><td>12:37:24</td><td>54 s</td></tr>
+        </tbody>
+      </table>
+      <p class="chart__caption" style="margin-top:6px">
+        Source: portal fault list, Resolved tab, re-exported 13 August &mdash; no further records after 12:37.
+        The full day (288 five-minute intervals, both systems) has been analysed.
+      </p>
+    </details>
   </section>
 
   <!-- =========================================== 2. the rate over the period -->
   <section class="section chart">
-    <h2 class="section__title">2 &nbsp;The rate fell through July &mdash; then stopped falling</h2>
+    <h2 class="section__title">2 &nbsp;Every day from 1 July to 12 August, coloured by mode</h2>
     <p class="section__lead">
-      Events per 1,000 <strong>exposed intervals</strong> &mdash; five-minute periods in which the array was
-      generating above 2&nbsp;kW, so an event would have been visible had it occurred. Normalising this way
-      means bright and dull weeks compare fairly.
+      <strong>Actual number of occurrences recorded each day</strong>, one bar per day, both systems on the
+      same scale. Every period compared is one calendar day, and every count is a direct observation &mdash;
+      no scaling or projection. <strong>Bar colour shows which mode</strong>, using the same two colours as
+      panel&nbsp;1.
     </p>
 
     <div class="legend">
-      <span class="legend__item"><span class="legend__swatch" style="background:var(--c-s2)"></span>System 2</span>
-      <span class="legend__item"><span class="legend__swatch" style="background:var(--c-s1)"></span>System 1</span>
+      <span class="legend__item"><span class="legend__swatch" style="background:var(--c-mode-a)"></span><span><strong>Mode&nbsp;A</strong> — logged faults (code-10 records)</span></span>
+      <span class="legend__item"><span class="legend__swatch" style="background:var(--c-mode-b)"></span><span><strong>Mode&nbsp;B</strong> — quiet disconnections (counted events)</span></span>
+      <span class="legend__item">Both panels use the same vertical scale (0&ndash;10).</span>
     </div>
 
-    <!-- Hand-built SVG bar chart. ADJUSTABLE: the numbers in the data table below
-         the chart are the source of truth; bar heights are derived from a 60.0
-         maximum (see the y-axis labels). -->
-    <svg class="chart__svg" viewBox="0 0 900 260" role="img"
-         aria-label="Bar chart of event rate per 1000 exposed intervals by period">
-      <!-- y grid -->
-      <g stroke="#d7dde4" stroke-width="1">
-        <line x1="58" y1="20"  x2="880" y2="20"/>
-        <line x1="58" y1="70"  x2="880" y2="70"/>
-        <line x1="58" y1="120" x2="880" y2="120"/>
-        <line x1="58" y1="170" x2="880" y2="170"/>
-        <line x1="58" y1="210" x2="880" y2="210" stroke="#1c2430" stroke-width="1.5"/>
-      </g>
-      <g fill="#5b6673" font-size="11" text-anchor="end">
-        <text x="52" y="24">60</text>
-        <text x="52" y="74">45</text>
-        <text x="52" y="124">30</text>
-        <text x="52" y="174">15</text>
-        <text x="52" y="214">0</text>
-      </g>
-
-      <!-- bars: x positions every 140px, S2 then S1 -->
-      <!-- 1-2 Jul: S2 0.00, S1 0.00 -->
-      <g>
-        <rect x="72"  y="210" width="40" height="0"   fill="#c0392b"/>
-        <rect x="114" y="210" width="40" height="0"   fill="#2471a3"/>
-        <text x="113" y="228" font-size="11" text-anchor="middle" fill="#1c2430">1–2 Jul</text>
-        <text x="113" y="242" font-size="10" text-anchor="middle" fill="#5b6673">0.00 / 0.00</text>
-      </g>
-      <!-- 3-14 Jul: S2 54.68 -> 182px, S1 3.75 -> 12.5px -->
-      <g>
-        <rect x="212" y="28"  width="40" height="182" fill="#c0392b"/>
-        <rect x="254" y="197" width="40" height="13"  fill="#2471a3"/>
-        <text x="253" y="228" font-size="11" text-anchor="middle" fill="#1c2430">3–14 Jul</text>
-        <text x="253" y="242" font-size="10" text-anchor="middle" fill="#5b6673">54.7 / 3.8</text>
-        <text x="232" y="22"  font-size="12" text-anchor="middle" fill="#c0392b" font-weight="700">54.7</text>
-      </g>
-      <!-- 15-21 Jul: S2 14.15 -> 47px, S1 3.16 -> 10.5px -->
-      <g>
-        <rect x="352" y="163" width="40" height="47"  fill="#c0392b"/>
-        <rect x="394" y="200" width="40" height="10"  fill="#2471a3"/>
-        <text x="393" y="228" font-size="11" text-anchor="middle" fill="#1c2430">15–21 Jul</text>
-        <text x="393" y="242" font-size="10" text-anchor="middle" fill="#5b6673">14.2 / 3.2</text>
-      </g>
-      <!-- 22-28 Jul: S2 1.44 -> 5px, S1 2.97 -> 10px -->
-      <g>
-        <rect x="492" y="205" width="40" height="5"   fill="#c0392b"/>
-        <rect x="534" y="200" width="40" height="10"  fill="#2471a3"/>
-        <text x="533" y="228" font-size="11" text-anchor="middle" fill="#1c2430">22–28 Jul</text>
-        <text x="533" y="242" font-size="10" text-anchor="middle" fill="#5b6673">1.4 / 3.0</text>
-      </g>
-      <!-- 29-31 Jul: S2 9.77 -> 33px, S1 0 -->
-      <g>
-        <rect x="632" y="177" width="40" height="33"  fill="#c0392b"/>
-        <rect x="674" y="210" width="40" height="0"   fill="#2471a3"/>
-        <text x="673" y="228" font-size="11" text-anchor="middle" fill="#1c2430">29–31 Jul</text>
-        <text x="673" y="242" font-size="10" text-anchor="middle" fill="#5b6673">9.8 / 0.0</text>
-      </g>
-      <!-- 1-5 Aug: S2 6.34 -> 21px, S1 0 -->
-      <g>
-        <rect x="772" y="189" width="40" height="21"  fill="#c0392b"/>
-        <rect x="814" y="210" width="40" height="0"   fill="#2471a3"/>
-        <text x="813" y="228" font-size="11" text-anchor="middle" fill="#1c2430">1–5 Aug</text>
-        <text x="813" y="242" font-size="10" text-anchor="middle" fill="#5b6673">6.3 / 0.0</text>
-      </g>
-    </svg>
+    <!-- Chart is drawn by the script at the foot of this file from the DAILY
+         array. To change the data, edit that array — nothing here needs touching. -->
+    <svg class="chart__svg" id="dailyChart" viewBox="0 0 900 400" role="img"
+         aria-label="Occurrences recorded per day for System 2 and System 1, coloured by mode, 1 July to 12 August 2026"></svg>
 
     <p class="chart__caption">
-      Rate per 1,000 exposed intervals. System&nbsp;1 recorded <strong>zero</strong> events across both
-      final periods while System&nbsp;2 continued.
+      <strong>The two colours never share a day on System&nbsp;2.</strong> Mode&nbsp;A occupies 1&ndash;2 July
+      and 12 August; Mode&nbsp;B occupies 3 July to 10 August. Mode&nbsp;B is highest in the days immediately
+      after 3&nbsp;July, declines through the month, then settles at a low but persistent level rather than
+      reaching zero. <strong>10&nbsp;August produced four Mode&nbsp;B events &mdash; the largest single day
+      since 13&nbsp;July</strong>, three of them within twenty minutes.
+      <strong>On 12&nbsp;August System&nbsp;2 records no Mode&nbsp;B events at all</strong>, and five
+      Mode&nbsp;A faults instead; System&nbsp;1 records one Mode&nbsp;B event, its first since 24&nbsp;July.
+      <br>
+      <span style="color:var(--c-ink-soft)">
+      Mode&nbsp;A is counted as <strong>code-10 records</strong> — each is paired with a code-329 seconds
+      later, so counting both would double the figure. The 1 July faults fall on the day the protection
+      settings were changed, with engineers on site, and one of them (13:19:59) appears on
+      <em>both</em> systems simultaneously — the only such coincidence in the record.
+      <br>
+      These are counts, not rates. The opportunity to observe a Mode&nbsp;B event was broadly similar on every
+      day &mdash; between 73 and 106 five-minute intervals with the array generating above 2&nbsp;kW, apart
+      from 1&nbsp;July (58, an unusually dull day) &mdash; so the bars are directly comparable. Mode&nbsp;A
+      needs no exposure correction: the fault log records at any hour. Where periods of <em>unequal</em>
+      length are compared elsewhere, the exposure-normalised rate per 1,000 intervals is used instead.
+      </span>
     </p>
 
-    <div class="callout callout--bad">
-      <span class="callout__title">The decline stopped &mdash; it did not reach zero</span>
-      Over <strong>29 July – 5 August</strong>: System&nbsp;2 had 6 events, System&nbsp;1 had 0, from almost
-      identical opportunity (780 vs 761 exposed intervals). One-sided test on that split:
-      <strong>p = 0.017</strong>. The difference in the most recent period is statistically significant,
-      not chance.
+    <div class="callout">
+      <span class="callout__title">The decline levelled off &mdash; and has not resumed</span>
+      Over the <strong>last fourteen days (30 July – 12 August)</strong>: System&nbsp;2 had
+      <strong>11 events</strong>, System&nbsp;1 had <strong>1</strong>, from almost identical opportunity
+      (1,363 vs 1,347 exposed intervals). One-sided test on that split: <strong>p = 0.003</strong>.
+      The most recent six days run <em>above</em> the preceding five (8.59 vs 4.13 per 1,000), so the July
+      decline has stopped rather than continued &mdash; and 12&nbsp;August's zero reflects a change of mode,
+      not an improvement.
     </div>
   </section>
 
   <!-- ======================================= 3. daily strip + time of day -->
-  <div class="grid2">
-    <section class="section chart">
-      <h2 class="section__title">3 &nbsp;The last twelve days</h2>
-      <svg class="chart__svg" viewBox="0 0 420 210" role="img"
-           aria-label="Daily event count for System 2, 25 July to 5 August">
-        <g stroke="#d7dde4"><line x1="34" y1="150" x2="410" y2="150" stroke="#1c2430" stroke-width="1.5"/></g>
-        <g fill="#5b6673" font-size="10" text-anchor="end">
-          <text x="28" y="64">2</text><text x="28" y="107">1</text><text x="28" y="154">0</text>
-        </g>
-        <!-- 12 days, 31px pitch. 1 event = 43px tall -->
-        <g>
-          <rect x="40"  y="150" width="20" height="0"  fill="#c0392b"/>
-          <rect x="71"  y="107" width="20" height="43" fill="#c0392b"/>
-          <rect x="102" y="150" width="20" height="0"  fill="#c0392b"/>
-          <rect x="133" y="150" width="20" height="0"  fill="#c0392b"/>
-          <rect x="164" y="107" width="20" height="43" fill="#c0392b"/>
-          <rect x="195" y="107" width="20" height="43" fill="#c0392b"/>
-          <rect x="226" y="107" width="20" height="43" fill="#c0392b"/>
-          <rect x="257" y="64"  width="20" height="86" fill="#c0392b"/>
-          <rect x="288" y="107" width="20" height="43" fill="#c0392b"/>
-          <rect x="319" y="150" width="20" height="0"  fill="#c0392b"/>
-          <rect x="350" y="150" width="20" height="0"  fill="#c0392b"/>
-          <rect x="381" y="150" width="20" height="0"  fill="#c0392b"/>
-        </g>
-        <g fill="#5b6673" font-size="9" text-anchor="middle">
-          <text x="50"  y="164">25</text><text x="81"  y="164">26</text>
-          <text x="112" y="164">27</text><text x="143" y="164">28</text>
-          <text x="174" y="164">29</text><text x="205" y="164">30</text>
-          <text x="236" y="164">31</text><text x="267" y="164">1</text>
-          <text x="298" y="164">2</text><text x="329" y="164">3</text>
-          <text x="360" y="164">4</text><text x="391" y="164">5</text>
-        </g>
-        <g fill="#1c2430" font-size="10" text-anchor="middle" font-weight="600">
-          <text x="143" y="182">JULY</text><text x="329" y="182">AUGUST</text>
-        </g>
-        <g fill="#2471a3" font-size="10">
-          <text x="40" y="200">System 1: zero events on every one of these days.</text>
-        </g>
-      </svg>
-      <p class="chart__caption">
-        Most recent event <strong>2 August</strong>. The three clear days since are within normal variation
-        at the current rate of ~0.7 events per generating day.
+  <!-- panel 3 stands alone; panel 4 below is full width -->
+    <section class="section">
+      <h2 class="section__title">3 &nbsp;<span class="pill pill--b">Mode B</span> The most recent quiet disconnections, measured in detail</h2>
+      <p class="section__lead">
+        Measuring-point channels were exported for <strong>10 August</strong> &mdash; the heaviest day, and
+        the most recent on which this behaviour appeared. Every event is confirmed at four independent
+        measurement points, and the switchboard meter reads normal at all of them.
       </p>
+      <table class="tbl">
+        <thead>
+          <tr><th>10 Aug</th><th>Array kW</th><th>AC out kW</th><th>Meter V</th><th>Backup V</th><th>Load W</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>11:20</td><td>15.41</td><td class="tbl__s2">0.01</td><td><strong>245.2</strong></td><td>217.0</td><td>43</td></tr>
+          <tr><td>11:35</td><td>15.44</td><td class="tbl__s2">0.01</td><td><strong>245.5</strong></td><td>208.2</td><td>38</td></tr>
+          <tr><td>11:40</td><td>9.66</td><td class="tbl__s2">0.01</td><td><strong>242.9</strong></td><td>212.5</td><td>76</td></tr>
+          <tr><td>15:35</td><td>2.51</td><td class="tbl__s2">0.00</td><td><strong>246.8</strong></td><td>220.4</td><td>117</td></tr>
+          <tr class="tbl__row--hi"><td><strong>17:10</strong></td><td><strong>0.29</strong></td><td class="tbl__s2">0.00</td><td><strong>241.9</strong></td><td>212.8</td><td>113</td></tr>
+        </tbody>
+      </table>
+      <p class="chart__caption" style="margin-top:8px">
+        Normal operation resumes at the very next sample every time. At 17:05 the inverter was exporting
+        <strong>3.50&nbsp;kW</strong>; at 17:10 <strong>0.00&nbsp;kW</strong>; at 17:20 <strong>7.36&nbsp;kW</strong>.
+        Meter voltage across the whole day stayed within 238.5&ndash;250.9&nbsp;V.
+      </p>
+      <div class="callout callout--bad">
+        <span class="callout__title">The 17:10 event is real, fully signatured &mdash; and uncountable</span>
+        Array output was only <strong>0.29&nbsp;kW</strong>, below the 2&nbsp;kW threshold the event count
+        requires. It shows AC output at <strong>exactly zero</strong>, the meter <strong>normal at
+        241.9&nbsp;V</strong>, and the backup port collapsed from 237.8&nbsp;V to <strong>212.8&nbsp;V</strong>.
+        <strong>Mode&nbsp;B also occurs outside the window this analysis can count</strong> &mdash; the
+        81-event figure covers only part of what is happening.
+      </div>
     </section>
 
-    <section class="section chart">
-      <h2 class="section__title">4 &nbsp;Events happen only 09:00–16:00</h2>
-      <svg class="chart__svg" viewBox="0 0 420 210" role="img"
-           aria-label="Histogram of event times of day">
-        <g><line x1="34" y1="150" x2="410" y2="150" stroke="#1c2430" stroke-width="1.5"/></g>
-        <g fill="#5b6673" font-size="10" text-anchor="end">
-          <text x="28" y="54">16</text><text x="28" y="102">8</text><text x="28" y="154">0</text>
-        </g>
-        <!-- 09..15 = 7 bars, pitch 50. 1 count = 6.1px -->
-        <g fill="#c0392b">
-          <rect x="44"  y="107" width="34" height="43"/>
-          <rect x="94"  y="64"  width="34" height="86"/>
-          <rect x="144" y="83"  width="34" height="67"/>
-          <rect x="194" y="52"  width="34" height="98"/>
-          <rect x="244" y="83"  width="34" height="67"/>
-          <rect x="294" y="95"  width="34" height="55"/>
-          <rect x="344" y="107" width="34" height="43"/>
-        </g>
-        <g fill="#fff" font-size="10" text-anchor="middle" font-weight="700">
-          <text x="61"  y="121">7</text><text x="111" y="78">14</text>
-          <text x="161" y="97">11</text><text x="211" y="66">16</text>
-          <text x="261" y="97">11</text><text x="311" y="109">9</text>
-          <text x="361" y="121">7</text>
-        </g>
-        <g fill="#5b6673" font-size="9.5" text-anchor="middle">
-          <text x="61"  y="164">09</text><text x="111" y="164">10</text>
-          <text x="161" y="164">11</text><text x="211" y="164">12</text>
-          <text x="261" y="164">13</text><text x="311" y="164">14</text>
-          <text x="361" y="164">15</text>
-        </g>
-        <text x="222" y="182" fill="#1c2430" font-size="10" text-anchor="middle" font-weight="600">HOUR OF DAY</text>
-        <text x="34" y="202" fill="#5b6673" font-size="9.5">None before 09:00. None after 16:00.</text>
-      </svg>
-      <p class="chart__caption">
-        Not driven by output level (median array output at events 8,462&nbsp;W vs 8,163&nbsp;W overall) and
-        not by battery state (<strong>SOC at events spans 7% to 99%</strong>).
-      </p>
-    </section>
-  </div>
+  <!-- ================================= 4. timing and incidence of everything -->
+  <section class="section chart">
+    <h2 class="section__title">4 &nbsp;When occurrences happen &mdash; every one on record, both modes</h2>
+    <p class="section__lead">
+      Every occurrence in the record placed on one chart: <strong>date across, time of day up</strong>. Four
+      sources are plotted separately so nothing is merged or inferred. The grey band behind each day is the
+      period in which the array was above 2&nbsp;kW &mdash; <strong>the only time a Mode&nbsp;B event can be
+      counted</strong> &mdash; so the reach of the counting method is visible alongside the data.
+    </p>
+
+    <div class="legend">
+      <span class="legend__item"><span class="legend__swatch" style="background:var(--c-mode-b);border-radius:50%"></span><span><strong>Mode&nbsp;B</strong>, S2 — counted event (81)</span></span>
+      <span class="legend__item"><span class="legend__swatch" style="background:var(--c-mode-a)"></span><span><strong>Mode&nbsp;A</strong>, S2 — code-10 fault (9)</span></span>
+      <span class="legend__item"><span class="legend__swatch" style="background:#fff;border:1.6px solid var(--c-s1);border-radius:50%"></span><span><strong>Mode&nbsp;B</strong>, S1 — counted event (9)</span></span>
+      <span class="legend__item"><span class="legend__swatch" style="background:#fff;border:1.5px solid var(--c-ink-soft)"></span>off-grid notification (20)</span>
+      <span class="legend__item"><span class="legend__swatch" style="background:#f4f7fa;border:1px solid #d7dde4"></span>array above 2 kW</span>
+    </div>
+
+    <!-- Drawn by the script at the foot of this file from EVB2/EVA2/EVB1/NOTIF/BAND. -->
+    <svg class="chart__svg" id="timingChart" viewBox="0 0 900 400" role="img"
+         aria-label="Every recorded occurrence plotted by date and time of day, 1 July to 12 August 2026"></svg>
+
+    <div class="grid2" style="margin-top:12px">
+      <div>
+        <table class="tbl">
+          <thead>
+            <tr><th>Hour</th><th>S2 chances</th><th>S2 Mode B</th><th>per 1,000</th><th>S1 per 1,000</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>07:00</td><td>40</td><td>0</td><td>0.0</td><td>0.0</td></tr>
+            <tr class="tbl__row--hi"><td>08:00</td><td>381</td><td><strong>0</strong></td><td><strong>0.0</strong></td><td>0.0</td></tr>
+            <tr><td>09:00</td><td>492</td><td>7</td><td>14.2</td><td>2.1</td></tr>
+            <tr><td>10:00</td><td>515</td><td>15</td><td>29.1</td><td>5.8</td></tr>
+            <tr><td>11:00</td><td>510</td><td>15</td><td>29.4</td><td>3.9</td></tr>
+            <tr><td>12:00</td><td>511</td><td>16</td><td><strong>31.3</strong></td><td>3.9</td></tr>
+            <tr><td>13:00</td><td>509</td><td>11</td><td>21.6</td><td>0.0</td></tr>
+            <tr><td>14:00</td><td>508</td><td>9</td><td>17.7</td><td>0.0</td></tr>
+            <tr><td>15:00</td><td>439</td><td>8</td><td>18.2</td><td>2.2</td></tr>
+            <tr class="tbl__row--hi"><td>16:00</td><td>110</td><td><strong>0</strong></td><td><strong>0.0</strong></td><td>0.0</td></tr>
+            <tr class="tbl__row--tot"><td><strong>All hours</strong></td><td><strong>4,015</strong></td><td><strong>81</strong></td><td><strong>20.2</strong></td><td><strong>2.3</strong></td></tr>
+          </tbody>
+        </table>
+        <p class="chart__caption" style="margin-top:8px">
+          Rates per 1,000 chances, so the shorter hours at each end are not penalised for having fewer.
+        </p>
+      </div>
+
+      <div>
+        <div class="callout">
+          <span class="callout__title">What the chart does and does not establish</span>
+          <strong>Counted Mode&nbsp;B events run from 09:15 to 15:50</strong>, and counting was possible from
+          about 07:45 to 16:20. The two are not the same span, so the concentration is not purely an artefact
+          of the method: <strong>421 chances in the 07:00 and 08:00 hours produced no counted event</strong>,
+          against about 8.5 expected at the all-day rate. That is a real pattern and worth explaining.
+          <br><br>
+          <strong>But it is not a boundary.</strong> The 17:10 occurrence on 10 August is confirmed at four
+          measurement points (panel&nbsp;3) and sits outside it; <strong>five notifications fall at or after
+          17:00</strong>, two of them at 18:15 when the array produces nothing at all; and the 2 July
+          Mode&nbsp;A fault is
+          logged at <strong>18:00</strong>. <strong>Read this as when counted events occurred, not as when
+          the fault can occur.</strong>
+        </div>
+        <div class="callout">
+          <span class="callout__title">Ruled out as the driver of the timing</span>
+          Not output level &mdash; median array output at events is 8,680&nbsp;W against ~8,200&nbsp;W
+          overall. Not battery state &mdash; <strong>SOC at events spans 7% to 99%</strong>. Not the two
+          systems sharing a cause &mdash; System&nbsp;1's nine events, plotted on the same chart, show no
+          matching pattern.
+        </div>
+        <div class="callout callout--good">
+          <span class="callout__title">A question this raises for the day</span>
+          Something makes the middle of the day different beyond simply having more sun. Ambient
+          temperature, inverter or battery temperature, and load profile all peak there.
+          <strong>Do the inverter's internal temperature records show anything at these times?</strong>
+          They are not available in the portal, but they would be a direct test.
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ============================================ 5. the reporting failure -->
   <section class="section">
-    <h2 class="section__title">5 &nbsp;Both of Sungrow's own reporting channels have failed</h2>
+    <h2 class="section__title">5 &nbsp;<span class="pill pill--b">Mode B</span> The monitoring record understates how often this happens</h2>
 
     <div class="grid2">
       <div>
         <table class="tbl">
           <thead><tr><th>Record</th><th>July</th><th>August</th></tr></thead>
           <tbody>
-            <tr><td>Events measured (S2)</td><td class="tbl__s2">72</td><td class="tbl__s2">3</td></tr>
-            <tr><td>Faults logged</td><td>9 <span style="color:var(--c-ink-soft)">(all 1–2 Jul)</span></td><td><strong>0</strong></td></tr>
-            <tr><td>Off-grid notifications</td><td>17</td><td><strong>0</strong></td></tr>
-            <tr class="tbl__row--tot"><td>Last fault / last notification</td><td colspan="2">2 Jul &middot; 25 Jul</td></tr>
+            <tr><td>Events measured (S2)</td><td class="tbl__s2">72</td><td class="tbl__s2"><strong>9</strong></td></tr>
+            <tr><td>Faults logged</td><td>9 <span style="color:var(--c-ink-soft)">(all 1–2 Jul)</span></td><td><strong>10</strong> <span style="color:var(--c-ink-soft)">(all 12 Aug)</span></td></tr>
+            <tr><td>Off-grid notifications</td><td>17</td><td><strong>3</strong> <span style="color:var(--c-ink-soft)">(all 10 Aug)</span></td></tr>
+            <tr class="tbl__row--tot"><td>Last fault / last notification</td><td colspan="2"><strong>12 Aug</strong> &middot; 10 Aug</td></tr>
           </tbody>
         </table>
-        <div class="callout callout--bad">
-          <span class="callout__title">Silence is not health</span>
-          No fault has been logged since <strong>2 July</strong> and no notification issued since
-          <strong>25 July</strong> — across a period containing <strong>75 measured events</strong>,
-          seven of them after the last notification.
+        <div class="callout">
+          <span class="callout__title">The notification channel is intermittent, not disabled</span>
+          It issued 17 notifications in July, then <strong>fell silent for 16 days</strong> while measured
+          events continued &mdash; and <strong>resumed on 10 August</strong> with three more. The fault log
+          did the same at greater length: <strong>silent from 2 July, then ten records on 12 August</strong>
+          (panel 1). <strong>Both channels are intermittent, not disabled</strong> &mdash; so silence from
+          either carries no information, in the period it covers or afterwards.
         </div>
       </div>
 
       <div>
-        <p style="font-weight:600;margin-bottom:6px;">Two independent records — and they barely overlap</p>
+        <p style="font-weight:600;margin-bottom:6px;">Two independent records — and they barely overlap <span style="font-weight:400;color:var(--c-ink-soft)">(July)</span></p>
         <!-- Overlap diagram. ADJUSTABLE: circle radii/positions are fixed; the
              numbers below are the source of truth. -->
         <svg class="chart__svg" viewBox="0 0 420 150" role="img"
@@ -528,29 +1003,213 @@ body {
           Two incomplete records of the same events, overlapping on only 8, allow the total to be
           estimated (capture–recapture): <strong>≈145, 95% CI 85–205</strong>. The five-minute data
           catches about <strong>half</strong>; the notification channel about <strong>one in nine</strong>.
-          The method under-counts here, so 145 is a floor.
+          The method's known biases here point downward, so ~145 is likely conservative &mdash; and it
+          agrees with the directly timed event in panel&nbsp;8.
         </div>
+        <p class="chart__caption">
+          Counting note: the two records are matched on 15-minute windows. One notification window can
+          contain two counted events, and two notified events fall below the 2&nbsp;kW counting gate,
+          which is why the circle totals do not simply add to 72 and 17.
+        </p>
       </div>
     </div>
 
     <div class="callout">
       <span class="callout__title">Notification timestamps are batched — they are not event times</span>
-      All 17 July notifications land on an exact quarter hour (:00, :15, :30, :45) with a seconds value of
-      00 or 01. The chance of that happening naturally is <strong>8&nbsp;×&nbsp;10<sup>−46</sup></strong>.
-      They are a scheduled send; the event lies somewhere in the preceding 15 minutes. Any record quoting
-      these times — including the installer's — describes a window, not a moment.
+      <strong>All 20</strong> notifications to date &mdash; 17 in July and 3 on 10 August &mdash; land on an
+      exact quarter hour (:00, :15, :30, :45) with a seconds value of 00 or 01. The chance of that happening
+      naturally is <strong>9&nbsp;×&nbsp;10<sup>−54</sup></strong>.
+      They are a scheduled send; the event lies somewhere in the preceding 15 minutes. Any record that quotes
+      these times — ours included — describes a 15-minute window, not a moment.
+    </div>
+  </section>
+
+  <!-- ============================ 5c. operating status difference -->
+  <section class="section">
+    <h2 class="section__title">6 &nbsp;The two inverters are in different operating <em>states</em> &mdash; unrelated to Mode A / Mode B</h2>
+    <p class="section__lead">
+      Both device pages carry a field labelled <strong>Operating status</strong>. They do not match.
+      Verified directly on iSolarCloud, 7&nbsp;August 2026.
+    </p>
+
+    <div class="grid2">
+      <div>
+        <table class="tbl">
+          <thead><tr><th>System</th><th>Operating status</th><th>Current status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>System 1</strong></td>
+                <td class="tbl__s1"><strong>Dispatched running</strong></td><td>Normal</td></tr>
+            <tr class="tbl__row--hi"><td><strong>System 2</strong></td>
+                <td class="tbl__s2"><strong>Grid-connected operation</strong></td><td>Normal</td></tr>
+          </tbody>
+        </table>
+        <p class="chart__caption" style="margin-top:8px">
+          <strong>Grid-connected operation</strong> is ordinary grid-tied running under the inverter's own
+          settings. <strong>Dispatched running</strong> is defined in Sungrow's own communication protocol
+          for this inverter family &mdash; register <code>13000</code>, value <code>0x8200</code>:
+        </p>
+        <div class="callout">
+          <span class="callout__title">Sungrow's definition, verbatim</span>
+          <em>"Dispatch Running: the inverter runs according to the scheduling instructions received from
+          the monitoring background. <strong>The active power is set to less than 100%.</strong>"</em>
+          <br><br>
+          <strong>By that definition it is a curtailment state.</strong> System&nbsp;1 appears to be
+          following scheduling instructions with its active power capped, while System&nbsp;2 runs
+          unconstrained. The portal label is presumed to map to this register state &mdash; the local
+          register read confirms it either way &mdash; and what issues the instructions (a portal or
+          installer setting, or an external party) is not yet known.
+        </div>
+      </div>
+
+      <div>
+        <div class="callout">
+          <span class="callout__title">Two identical inverters, two different modes</span>
+          Same site, same grid connection, same model, same firmware &mdash; and one is being externally
+          scheduled and capped while the other is not. <strong>This is the only configuration difference so
+          far identified between the two systems</strong>, and it is not yet known what is issuing
+          the instructions, or why to only one inverter.
+        </div>
+        <div class="callout callout--good">
+          <span class="callout__title">Stated plainly: this is not offered as the cause</span>
+          It is <strong>System&nbsp;1</strong> &mdash; the system that is <em>not</em> disconnecting &mdash;
+          that is being curtailed, and no evidence links this to the System&nbsp;2 events. It is raised
+          because it is an unexplained asymmetry between two systems the whole comparison assumes are
+          identical, and because a power-capped inverter makes an imperfect baseline for any comparison of
+          output or curtailment behaviour.
+        </div>
+        <p style="font-size:9pt;margin:8px 0 0">
+          <strong>Ask on the day:</strong> what is issuing scheduling instructions to System&nbsp;1, and to
+          what active-power limit? Is it deliberate, and who configured it? Is it persistent or only while
+          an instruction is active? Should both inverters be in the same mode &mdash; and if so, which one is
+          wrong? <strong>Read registers 13000 and 13050 on both units locally</strong> &mdash; the app is
+          documented to misreport EMS mode, so the portal display cannot settle this.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 6b. 10 August -->
+  <section class="section">
+    <h2 class="section__title">7 &nbsp;<span class="pill pill--b">Mode B</span> 10 August &mdash; the clearest single day in the record</h2>
+    <p class="section__lead">
+      Three off-grid notifications and four measured events fell on the same day. <strong>They barely
+      overlap.</strong> Together they imply at least five distinct events in twenty-four hours.
+    </p>
+
+    <div class="grid2">
+      <div>
+        <table class="tbl">
+          <thead><tr><th>Notification</th><th>15-min window</th><th style="text-align:left">What the 5-minute data shows</th></tr></thead>
+          <tbody>
+            <tr><td><strong>10:45</strong></td><td>10:30&ndash;10:45</td><td style="text-align:left"><strong>Nothing.</strong> All samples normal, Load 4,588&ndash;6,981&nbsp;W</td></tr>
+            <tr class="tbl__row--hi"><td><strong>11:45</strong></td><td>11:30&ndash;11:45</td><td style="text-align:left"><strong>Two</strong> measured events &mdash; 11:35 and 11:40</td></tr>
+            <tr><td><strong>17:15</strong></td><td>17:00&ndash;17:15</td><td style="text-align:left">17:10 shows the <strong>full signature</strong> &mdash; but array only 288&nbsp;W, below the 2&nbsp;kW gate</td></tr>
+          </tbody>
+        </table>
+        <p class="chart__caption" style="margin-top:8px">
+          Measured events at <strong>11:20</strong> and <strong>15:35</strong> produced no notification at
+          all. One notification covered two events; two notifications covered events the count never saw.
+        </p>
+        <table class="tbl" style="margin-top:6px">
+          <tbody>
+            <tr><td>Measured only, no notification</td><td>2</td></tr>
+            <tr><td>Notified only, nothing measured</td><td>2</td></tr>
+            <tr><td>Both (one notification, two events)</td><td>1</td></tr>
+            <tr class="tbl__row--tot"><td><strong>Minimum distinct events, 10 August</strong></td><td><strong>5</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="callout">
+          <span class="callout__title">An event confirmed in the data that the count cannot see</span>
+          At <strong>17:10</strong> the channels read grid exchange <strong>0&nbsp;W</strong>, battery
+          &minus;175&nbsp;W and <strong>Load 113&nbsp;W</strong> &mdash; the unmistakable signature. But array
+          output was only <strong>288&nbsp;W</strong>, and the last interval above 2&nbsp;kW that day was
+          16:30. <strong>Events also happen outside the window this analysis can measure</strong>, and this is
+          the first one both notified and independently visible in the data.
+        </div>
+        <div class="callout">
+          <span class="callout__title">Notification counts are not event counts</span>
+          The 11:45 notification spans <strong>two</strong> measured events four minutes apart. Any account
+          that relies on counting notifications will understate the frequency twice over: the channel
+          misses events, and when it does report, one message can stand for several.
+        </div>
+        <div class="callout callout--good">
+          <span class="callout__title">Why this one day matters most</span>
+          Every other conclusion here rests on averaging across weeks. <strong>This is a single day in which
+          each reporting route independently caught events the other missed</strong> &mdash; the incompleteness
+          is visible without any statistics at all.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================== 7. the directly timed event -->
+  <section class="section">
+    <h2 class="section__title">8 &nbsp;<span class="pill pill--b">Mode B</span> An event timed directly &mdash; 7 August, at 10-second resolution</h2>
+    <p class="section__lead">
+      The iSolarCloud chart renders 10-second data for the current day only. On 7&nbsp;August an event was
+      watched live and timed. Two events occurred that day; the exported five-minute data contains one.
+    </p>
+
+    <div class="grid2">
+      <div>
+        <table class="tbl">
+          <thead><tr><th></th><th>Event A</th><th>Event B</th></tr></thead>
+          <tbody>
+            <tr><td>Time</td><td>~10:05</td><td><strong>12:11:10&ndash;12:13:30</strong></td></tr>
+            <tr><td>Duration</td><td>not observed</td><td class="tbl__s2"><strong>140 seconds</strong></td></tr>
+            <tr class="tbl__row--hi"><td><strong>In the 5-minute data?</strong></td><td><strong>Yes</strong></td><td><strong>No &mdash; missed</strong></td></tr>
+            <tr><td>S2 AC output at sample</td><td class="tbl__s2">0.000 kW</td><td>2.86 / 2.90 kW</td></tr>
+            <tr><td>Fault logged?</td><td>No</td><td>No</td></tr>
+            <tr><td>Notification sent?</td><td>No</td><td>No</td></tr>
+          </tbody>
+        </table>
+        <p class="chart__caption" style="margin-top:8px">
+          Event B began 70 seconds after one five-minute sample and ended 90 seconds before the next.
+          <strong>No sample falls inside it.</strong> At 10:05, by contrast, System&nbsp;2's output was
+          <strong>exactly 0.000&nbsp;kW</strong> while System&nbsp;1 was exporting 10.15&nbsp;kW.
+        </p>
+      </div>
+
+      <div>
+        <div class="callout">
+          <span class="callout__title">Two methods, the same answer: about half of all events are missed</span>
+          A 140-second event sampled every 300 seconds is caught <strong>46.7%</strong> of the time.
+          Independently, the overlap between the measured record and the notification record implies the
+          five-minute data captures <strong>49.7%</strong>. A stopwatch on one event and a statistical
+          estimate across a month agree to within three points &mdash; which is why the true July count is
+          put at <strong>~145, not 72</strong>.
+        </div>
+        <div class="callout">
+          <span class="callout__title">The 10-second data exists but cannot be exported</span>
+          Selecting the <strong>10&nbsp;s</strong> interval leaves the selector reading "10 s" but returns
+          <strong>15-minute</strong> data in both the table and the CSV &mdash; coarser than the 5-minute
+          default. The inverter is clearly producing measurements at the resolution needed to diagnose this;
+          if there is a way to retrieve them, it would be the single most useful thing we could be given.
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="callout__title">Event B is the clearest single measurement in this pack</span>
+      It demonstrably happened &mdash; it was watched and timed. It produced <strong>no fault record, no
+      notification, and no trace in the five-minute data</strong>. That is not a criticism of any one
+      channel; it is simply what a two-minute event looks like when the available records sample every five
+      minutes. It is the reason we treat every count here as a floor rather than a total.
     </div>
   </section>
 
   <!-- ================================================= 6. what's been ruled out -->
   <section class="section">
-    <h2 class="section__title">6 &nbsp;What has been ruled out, and what is left</h2>
+    <h2 class="section__title">9 &nbsp;<span class="pill pill--b">Mode B</span> What has been ruled out, and what is left</h2>
     <div class="grid2">
       <div>
         <table class="tbl">
           <thead><tr><th>Possible cause</th><th style="text-align:left">Status</th></tr></thead>
           <tbody>
-            <tr><td>Grid supply fault</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — meter normal at every event</td></tr>
+            <tr><td>Grid supply fault</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — meter normal at every event; S1, on the same connection, kept operating normally</td></tr>
             <tr><td>Shared protection relay</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — would trip both systems; S1 unaffected</td></tr>
             <tr><td>Grid frequency excursion</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — flat 49.93–50.03 Hz, identical to S1</td></tr>
             <tr><td>Battery state</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — events at SOC 7% through 99%</td></tr>
@@ -563,7 +1222,7 @@ body {
         </table>
       </div>
       <div>
-        <div class="callout callout--bad">
+        <div class="callout">
           <span class="callout__title">The two remaining causes look identical in all monitoring data</span>
           An inverter-side internal trip and an uncommanded contactor dropout produce exactly the same
           signature: meter normal, terminals depressed, backup port collapsed, no fault logged.
@@ -581,23 +1240,37 @@ body {
 
   <!-- ================================================= 7. actions -->
   <section class="section">
-    <h2 class="section__title">7 &nbsp;For the site attendance — Friday 14 August 2026</h2>
+    <h2 class="section__title">10 &nbsp;For the site attendance — Friday 14 August 2026</h2>
     <ol class="actions">
       <li class="actions__item actions__item--priority">
         <strong>Test the System 2 contactor coil circuit — coil voltage at the coil under load, and aux contact resistance.</strong>
         <span>Never performed. The only remaining way to identify the fault. Make this the priority of the visit.</span>
       </li>
       <li class="actions__item actions__item--priority">
-        <strong>Do not plan around observing an event on the day.</strong>
-        <span>At ~0.7 events per generating day, a full day on site 09:00–16:00 has about a
-        <strong>51% chance</strong> of catching one; a 10:00–14:00 attendance about 34%.
-        Observing nothing proves nothing. A recording power-quality logger left for 2–3 weeks
-        would be far more informative.</span>
+        <strong>Watch the live chart at 10-second resolution &mdash; and screenshot it.</strong>
+        <span>A live observer sees roughly <strong>twice</strong> as many events as any export will show,
+        and that resolution cannot be downloaded. On 7 August two events occurred and only one reached the
+        exported data. At ~0.7 events per generating day a full day on site has about a
+        <strong>51% chance</strong> of catching one in the exported record; observing nothing proves
+        nothing. A recording power-quality logger left for 2&ndash;3 weeks remains the better answer.</span>
       </li>
       <li class="actions__item">
-        <strong>Obtain the inverter-side event log from Sungrow.</strong>
-        <span>Both customer-visible channels are silent while events continue. Protection operations
-        that raise no customer fault should appear in Sungrow's own record.</span>
+        <strong>Ask Sungrow to make the 10-second data available.</strong>
+        <span>The inverter already produces it and the chart already renders it &mdash; the export path
+        returns 15-minute data instead. This is the shortest route to characterising an event properly.</span>
+      </li>
+      <li class="actions__item">
+        <strong>Share the inverter-side event log with us.</strong>
+        <span>The customer-visible channels report intermittently &mdash; nothing between 2 July and
+        12 August, then ten records in a day. Protection operations that raise no customer-facing fault
+        should still appear in Sungrow's own record, and would tell us directly what the inverter
+        was doing during the quiet disconnections.</span>
+      </li>
+      <li class="actions__item">
+        <strong>Help us establish why System&nbsp;1 is "Dispatched running" and System&nbsp;2 is not.</strong>
+        <span>Two identically specified inverters on one connection are in different operating modes.
+        Is that intended &mdash; and if so, what is issuing the instructions, and does the difference
+        affect export limits or reconnection behaviour? (Panel 6.)</span>
       </li>
       <li class="actions__item">
         <strong>Obtain, in writing, the protection threshold values before and after 1 July.</strong>
@@ -605,9 +1278,10 @@ body {
         relationship cannot be assessed.</span>
       </li>
       <li class="actions__item">
-        <strong>Ask what stops the inverter exporting without raising a logged fault.</strong>
-        <span>The log has been silent through an estimated ~145 events. Also: why did notifications stop
-        on 25 July while events continued?</span>
+        <strong>Help us understand what stops the inverter exporting without raising a logged fault.</strong>
+        <span>Knowing which conditions do and do not generate a record would explain the gap between the log
+        and the measurements — and is very likely the same question as
+        <em>what determines which of the two modes the inverter is in</em> (panel 1).</span>
       </li>
     </ol>
   </section>
@@ -616,12 +1290,12 @@ body {
   <footer class="footer">
     <p class="footer__title">Data sources — all portal-generated exports, verified at capture</p>
     <ul>
-      <li><strong>Daily reports</strong>, 5-minute (PV, Grid, Battery, Load, SOC): 1 Jul – 5 Aug 2026, all 36 days, both systems — <strong>20,736 rows</strong></li>
-      <li><strong>Measuring-point curves</strong>, 5-minute, both systems: 3–5 Jul (22 channels, 19,008 rows); 31 Jul – 2 Aug (12 channels, 10,368 rows); 19–21 Jun validation (3,456 rows)</li>
+      <li><strong>Daily reports</strong>, 5-minute (PV, Grid, Battery, Load, SOC): 1 Jul – 12 Aug 2026, all 43 days, both systems — <strong>24,768 rows</strong></li>
+      <li><strong>Measuring-point curves</strong>, 5-minute: 3–5 Jul (22 channels, 19,008 rows) and 31 Jul – 2 Aug (12 channels, 10,368 rows), both systems; <strong>10 Aug and 12 Aug (4 channels each, S2, 2,304 rows)</strong>; 19–21 Jun validation (3,456 rows)</li>
       <li><strong>Measuring-point curves</strong>, 15-minute: inverter phase B voltage, 27 Jul – 5 Aug, both systems — 1,920 rows</li>
-      <li><strong>Fault list</strong>, exported CSV: July 2026, both systems — 9 records. August produced no faults, so no export exists</li>
-      <li><strong>Off-grid notifications</strong>: 17 absolute timestamps, July 2026, read from the iSolarCloud phone app. None in August</li>
-      <li><strong>Total analysed: 55,488 five-minute data rows</strong>, plus 9 fault records and 17 notification timestamps</li>
+      <li><strong>Fault list</strong>, exported CSV: 9 records in July (all 1–2 Jul) and <strong>10 records on 12 August</strong>, all System 2. Re-exported 13 August to confirm the day was complete</li>
+      <li><strong>Off-grid notifications</strong>: 20 absolute timestamps — 17 in July, 3 on 10 August — read from the iSolarCloud phone app</li>
+      <li><strong>Total analysed: 61,824 five-minute data rows</strong>, plus 19 fault records and 20 notification timestamps</li>
     </ul>
     <p style="margin-top:6px">
       Every figure on this page was verified programmatically against the source files.
@@ -632,5 +1306,283 @@ body {
   </footer>
 
 </div>
+
+<script>
+/* ============================================================================
+   DAILY CHART (panel 2) — drawn from the array below.
+
+   ADJUSTABLE: DAILY is the only thing you need to edit. Each entry is
+     [day label, S2 Mode B, S1 Mode B, S2 exposed intervals, S2 Mode A, S1 Mode A]
+   Mode B = counted quiet-disconnection events. Mode A = code-10 fault records
+   (each is paired with a code-329 seconds later; counting both would double it).
+   Add or remove rows freely — the chart re-spaces itself. Y_MAX sets the top of
+   both panels; keep the two panels on the same scale or the comparison stops
+   being fair.
+   ========================================================================== */
+var DAILY = [
+  /* label,  S2 modeB, S1 modeB, S2 exposed, S2 modeA, S1 modeA */
+  ['1',  0, 0,  58, 3, 2], ['2',  0, 0,  83, 1, 0], ['3',  8, 1,  96, 0, 0],
+  ['4',  6, 0,  96, 0, 0], ['5',  8, 0,  83, 0, 0], ['6',  2, 1,  83, 0, 0],
+  ['7',  3, 0,  79, 0, 0], ['8',  3, 2,  73, 0, 0], ['9',  9, 0,  98, 0, 0],
+  ['10', 4, 0,  88, 0, 0], ['11', 2, 0,  97, 0, 0], ['12', 1, 0,  90, 0, 0],
+  ['13', 8, 0,  98, 0, 0], ['14', 5, 0,  98, 0, 0], ['15', 3, 0,  96, 0, 0],
+  ['16', 1, 0,  80, 0, 0], ['17', 1, 1,  85, 0, 0], ['18', 1, 0,  90, 0, 0],
+  ['19', 2, 0,  86, 0, 0], ['20', 0, 0,  98, 0, 0], ['21', 1, 1, 101, 0, 0],
+  ['22', 0, 0, 100, 0, 0], ['23', 0, 1,  93, 0, 0], ['24', 0, 1, 101, 0, 0],
+  ['25', 0, 0, 100, 0, 0], ['26', 1, 0,  98, 0, 0], ['27', 0, 0, 100, 0, 0],
+  ['28', 0, 0, 102, 0, 0], ['29', 1, 0, 102, 0, 0], ['30', 1, 0, 102, 0, 0],
+  ['31', 1, 0, 103, 0, 0],
+  ['1',  2, 0,  92, 0, 0], ['2',  1, 0, 102, 0, 0], ['3',  0, 0,  79, 0, 0],
+  ['4',  0, 0, 104, 0, 0], ['5',  0, 0,  96, 0, 0], ['6',  1, 0, 103, 0, 0],
+  ['7',  1, 0, 105, 0, 0], ['8',  0, 0, 101, 0, 0], ['9',  0, 0,  90, 0, 0],
+  ['10', 4, 0,  96, 0, 0], ['11', 0, 0, 106, 0, 0], ['12', 0, 1,  84, 5, 0]
+];
+/* Column indices into a DAILY row, per system. */
+var S2_B = 1, S1_B = 2, S2_A = 4, S1_A = 5;
+
+var JULY_DAYS = 31;          /* index at which the August label starts */
+var Y_MAX     = 10;          /* top of the scale — one above the highest daily
+                                count (9), so the tallest bar's label has room */
+var Y_TICKS   = [0, 2, 4, 6, 8, 10];
+/* ADJUSTABLE: these two must match the Mode A / Mode B colours in the CSS
+   (--c-flag and --c-s2) or panel 2 will disagree with panel 1. */
+var C_MODE_A = '#6f42a5', C_MODE_B = '#c0392b';
+var C_S1 = '#2471a3', C_INK = '#1c2430', C_SOFT = '#5b6673';
+
+(function drawDaily() {
+  var svg = document.getElementById('dailyChart');
+  if (!svg) return;
+
+  var X0 = 62, X1 = 890;                 /* plot area, left and right */
+  var TOP2 = 34,  H = 132;               /* System 2 panel: top y, height */
+  var TOP1 = 224;                        /* System 1 panel: top y (same H) */
+  var pitch = (X1 - X0) / DAILY.length;
+  var bw = Math.max(6, pitch - 8);       /* bar width */
+  var px = H / Y_MAX;                    /* pixels per unit — identical both panels */
+  var ns = 'http://www.w3.org/2000/svg';
+
+  function el(name, attrs, text) {
+    var n = document.createElementNS(ns, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (text !== undefined) n.textContent = text;
+    svg.appendChild(n);
+    return n;
+  }
+
+  /* One panel: baseline, gridlines, axis labels, bars.
+     colB / colA are the DAILY column indices for that system's Mode B and
+     Mode A counts. A day can in principle show both; on System 2 none does,
+     and if one ever did the two bars would sit side by side rather than
+     stacked, so neither is hidden. */
+  function panel(top, colB, colA, titleColour, title) {
+    var base = top + H;
+    Y_TICKS.forEach(function (v) {
+      var y = base - v * px;
+      el('line', { x1: X0, y1: y, x2: X1, y2: y,
+                   stroke: v === 0 ? C_INK : '#e3e8ee',
+                   'stroke-width': v === 0 ? 1.5 : 1 });
+      el('text', { x: X0 - 8, y: y + 4, 'font-size': 10, fill: C_SOFT,
+                   'text-anchor': 'end' }, v);
+    });
+    el('text', { x: X0, y: top - 10, 'font-size': 11.5, fill: titleColour,
+                 'font-weight': 700 }, title);
+
+    DAILY.forEach(function (d, i) {
+      var b = d[colB], a = d[colA];
+      var slot = X0 + i * pitch;
+      var both = (b > 0 && a > 0);
+      var w = both ? (bw - 2) / 2 : bw;
+
+      function bar(v, colour, xLeft) {
+        if (v <= 0) return;
+        el('rect', { x: xLeft, y: base - v * px, width: w, height: v * px, fill: colour });
+        /* print the count above the bar — these are small whole numbers, so show them */
+        el('text', { x: xLeft + w / 2, y: base - v * px - 4, 'font-size': 9,
+                     fill: colour, 'font-weight': 700, 'text-anchor': 'middle' }, v);
+      }
+
+      if (both) {
+        var x0 = slot + (pitch - bw) / 2;
+        bar(a, C_MODE_A, x0);
+        bar(b, C_MODE_B, x0 + w + 2);
+      } else {
+        var xc = slot + (pitch - w) / 2;
+        bar(a, C_MODE_A, xc);
+        bar(b, C_MODE_B, xc);
+      }
+
+      if (b === 0 && a === 0) {
+        /* a visible tick for a genuine zero, so empty days are not ambiguous */
+        el('rect', { x: slot + (pitch - bw) / 2, y: base - 1.5,
+                     width: bw, height: 1.5, fill: '#c9d2db' });
+      }
+    });
+  }
+
+  panel(TOP2, S2_B, S2_A, C_INK, 'SYSTEM 2 — occurrences per day, by mode');
+  panel(TOP1, S1_B, S1_A, C_S1,  'SYSTEM 1 — occurrences per day, by mode, same scale');
+
+  /* date labels under the lower panel */
+  var base1 = TOP1 + H;
+  DAILY.forEach(function (d, i) {
+    var x = X0 + i * pitch + pitch / 2;
+    el('text', { x: x, y: base1 + 15, 'font-size': 9, fill: C_SOFT,
+                 'text-anchor': 'middle' }, d[0]);
+  });
+  var midJul = X0 + (JULY_DAYS / 2) * pitch;
+  var midAug = X0 + (JULY_DAYS + (DAILY.length - JULY_DAYS) / 2) * pitch;
+  el('text', { x: midJul, y: base1 + 32, 'font-size': 10.5, fill: C_INK,
+               'font-weight': 700, 'text-anchor': 'middle' }, 'JULY 2026');
+  el('text', { x: midAug, y: base1 + 32, 'font-size': 10.5, fill: C_INK,
+               'font-weight': 700, 'text-anchor': 'middle' }, 'AUGUST');
+
+  /* month divider */
+  var divX = X0 + JULY_DAYS * pitch;
+  el('line', { x1: divX, y1: TOP2 - 4, x2: divX, y2: base1 + 4,
+               stroke: '#b9c3cd', 'stroke-width': 1, 'stroke-dasharray': '3 3' });
+
+  /* (No "first event" annotation is drawn — the two zero days at the left of the
+     System 2 panel show it plainly, and the caption states it. An annotation
+     here would sit on top of the 5 July bar.) */
+})();
+
+/* ============================================================================
+   TIMING CHART (panel 4) — every recorded occurrence, date across, time up.
+
+   Each entry is [day index, minutes past midnight]. Day 0 = 1 July,
+   day 42 = 12 August — the same 43 days as the DAILY array above.
+   BAND is [day index, first minute above 2 kW, last minute above 2 kW].
+
+   ADJUSTABLE: T_LO / T_HI set the vertical span (06:00 to 19:00 by default).
+   R_DOT sets marker size. Nothing else needs touching to add a day.
+   ========================================================================== */
+var EVB2 = [
+  [2,580], [2,595], [2,620], [2,650], [2,675], [2,710], [2,745], [2,750], [3,665], [3,735], [3,830], [3,880],
+  [3,920], [3,940], [4,610], [4,675], [4,680], [4,730], [4,825], [4,830], [4,855], [4,870], [5,575], [5,755],
+  [6,615], [6,620], [6,715], [7,555], [7,705], [7,760], [8,595], [8,605], [8,635], [8,655], [8,705], [8,735],
+  [8,790], [8,845], [8,930], [9,730], [9,745], [9,760], [9,890], [10,725], [10,830], [11,755], [12,575], [12,635],
+  [12,715], [12,805], [12,835], [12,850], [12,940], [12,950], [13,580], [13,620], [13,715], [13,780], [13,865], [14,760],
+  [14,815], [14,950], [15,745], [16,945], [17,790], [18,700], [18,870], [20,625], [25,845], [28,635], [29,735], [30,630],
+  [31,605], [31,790], [32,740], [36,715], [37,605], [40,680], [40,695], [40,700], [40,935]
+];
+var EVB1 = [
+  [2,710], [5,705], [7,555], [7,940], [16,755], [20,625], [22,610], [23,655], [42,770]
+];
+var EVA2 = [
+  [0,673], [0,799], [0,898], [1,1080], [42,669], [42,692], [42,738], [42,744], [42,756]
+];
+var EVA1 = [
+  [0,661], [0,799]
+];
+var NOTIF = [
+  [2,600], [2,705], [3,885], [3,1095], [7,1020], [8,600], [9,765], [10,720], [11,660], [12,945], [13,630], [13,870],
+  [13,1035], [16,1095], [17,690], [17,795], [24,855], [40,645], [40,705], [40,1035]
+];
+/* Confirmed at four measurement points but below the 2 kW counting gate,
+   so it is NOT one of the 81. Drawn as a ringed marker. */
+var UNCOUNTED = [ [40,1030] ];
+var BAND = [
+  [0,605,925], [1,545,955], [2,480,960], [3,485,960], [4,530,975], [5,520,965], [6,500,935], [7,555,955],
+  [8,480,980], [9,490,930], [10,480,960], [11,520,965], [12,480,965], [13,480,965], [14,490,965], [15,500,925],
+  [16,510,950], [17,500,980], [18,495,975], [19,485,970], [20,470,970], [21,475,975], [22,490,970], [23,475,975],
+  [24,475,970], [25,475,975], [26,470,975], [27,465,975], [28,470,975], [29,470,975], [30,470,980], [31,495,950],
+  [32,470,975], [33,535,970], [34,465,980], [35,465,950], [36,460,985], [37,465,985], [38,475,975], [39,460,905],
+  [40,505,990], [41,460,985], [42,480,980]
+];
+
+(function drawTiming() {
+  var svg = document.getElementById('timingChart');
+  if (!svg) return;
+
+  var X0 = 62, X1 = 890, TOP = 26, BOT = 330;
+  var T_LO = 6 * 60, T_HI = 19 * 60;      /* vertical span, minutes */
+  var R_DOT = 3.4;
+  var DAYS = BAND.length;
+  var pitch = (X1 - X0) / DAYS;
+  var ns = 'http://www.w3.org/2000/svg';
+
+  function el(name, attrs, text) {
+    var n = document.createElementNS(ns, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (text !== undefined) n.textContent = text;
+    svg.appendChild(n);
+    return n;
+  }
+  function xOf(day) { return X0 + day * pitch + pitch / 2; }
+  function yOf(min) { return BOT - (min - T_LO) / (T_HI - T_LO) * (BOT - TOP); }
+
+  /* hour gridlines and labels */
+  for (var h = 6; h <= 19; h++) {
+    var y = yOf(h * 60);
+    el('line', { x1: X0, y1: y, x2: X1, y2: y,
+                 stroke: h % 2 === 0 ? '#e3e8ee' : '#f0f3f6', 'stroke-width': 1 });
+    if (h % 2 === 0) {
+      el('text', { x: X0 - 8, y: y + 3.5, 'font-size': 9, fill: C_SOFT,
+                   'text-anchor': 'end' }, (h < 10 ? '0' : '') + h + ':00');
+    }
+  }
+
+  /* the countable window, one soft column per day */
+  BAND.forEach(function (b) {
+    if (!b[1]) return;
+    var x = X0 + b[0] * pitch + 1.5;
+    var w = Math.max(3, pitch - 3);
+    el('rect', { x: x, y: yOf(b[2]), width: w, height: yOf(b[1]) - yOf(b[2]),
+                 fill: '#eef2f6' });
+  });
+
+  /* month divider */
+  var divX = X0 + JULY_DAYS * pitch;
+  el('line', { x1: divX, y1: TOP - 6, x2: divX, y2: BOT + 6,
+               stroke: '#b9c3cd', 'stroke-width': 1, 'stroke-dasharray': '3 3' });
+
+  /* notifications first, so measured points sit on top of them */
+  NOTIF.forEach(function (p) {
+    el('rect', { x: xOf(p[0]) - 3.6, y: yOf(p[1]) - 3.6, width: 7.2, height: 7.2,
+                 fill: '#fff', stroke: C_SOFT, 'stroke-width': 1.2 });
+  });
+  /* Mode A — squares, in the Mode A colour */
+  EVA1.forEach(function (p) {
+    el('rect', { x: xOf(p[0]) - 3.2, y: yOf(p[1]) - 3.2, width: 6.4, height: 6.4,
+                 fill: '#fff', stroke: C_MODE_A, 'stroke-width': 1.6 });
+  });
+  EVA2.forEach(function (p) {
+    el('rect', { x: xOf(p[0]) - 3.6, y: yOf(p[1]) - 3.6, width: 7.2, height: 7.2,
+                 fill: C_MODE_A });
+  });
+  /* Mode B — circles */
+  EVB1.forEach(function (p) {
+    el('circle', { cx: xOf(p[0]), cy: yOf(p[1]), r: R_DOT,
+                   fill: '#fff', stroke: C_S1, 'stroke-width': 1.6 });
+  });
+  EVB2.forEach(function (p) {
+    el('circle', { cx: xOf(p[0]), cy: yOf(p[1]), r: R_DOT, fill: C_MODE_B,
+                   'fill-opacity': .88 });
+  });
+  /* confirmed but uncountable */
+  UNCOUNTED.forEach(function (p) {
+    el('circle', { cx: xOf(p[0]), cy: yOf(p[1]), r: R_DOT, fill: C_MODE_B });
+    el('circle', { cx: xOf(p[0]), cy: yOf(p[1]), r: R_DOT + 3.2, fill: 'none',
+                   stroke: C_MODE_B, 'stroke-width': 1.2, 'stroke-dasharray': '2 2' });
+  });
+  el('text', { x: xOf(40) - 10, y: yOf(1030) - 10, 'font-size': 8.5,
+               fill: C_MODE_B, 'font-weight': 700, 'text-anchor': 'end' },
+     '17:10 — confirmed, below the counting gate');
+
+  /* axes */
+  el('line', { x1: X0, y1: BOT, x2: X1, y2: BOT, stroke: C_INK, 'stroke-width': 1.5 });
+  DAILY.forEach(function (d, i) {
+    el('text', { x: xOf(i), y: BOT + 14, 'font-size': 8.5, fill: C_SOFT,
+                 'text-anchor': 'middle' }, d[0]);
+  });
+  el('text', { x: X0 + (JULY_DAYS / 2) * pitch, y: BOT + 30, 'font-size': 10.5,
+               fill: C_INK, 'font-weight': 700, 'text-anchor': 'middle' }, 'JULY 2026');
+  el('text', { x: X0 + (JULY_DAYS + (DAYS - JULY_DAYS) / 2) * pitch, y: BOT + 30,
+               'font-size': 10.5, fill: C_INK, 'font-weight': 700,
+               'text-anchor': 'middle' }, 'AUGUST');
+  el('text', { x: X0, y: TOP - 10, 'font-size': 9.5, fill: C_SOFT },
+     'Each mark is one recorded occurrence. Shaded columns show when a Mode B event could be counted.');
+})();
+</script>
 </body>
 </html>
