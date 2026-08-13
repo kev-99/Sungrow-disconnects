@@ -530,7 +530,7 @@ body {
           <li class="is-out"><strong>Frequency excursion</strong> — flat 49.93–50.03&nbsp;Hz, identical to System&nbsp;1</li>
           <li class="is-out"><strong>Battery state</strong> — events at 7% through 99% SOC</li>
           <li class="is-out"><strong>Output level / clipping</strong> — event output matches normal</li>
-          <li class="is-out"><strong>Simple undervoltage trip</strong> — 217&nbsp;V reached 1 Aug with no disconnection</li>
+          <li class="is-out"><strong>Simple undervoltage trip</strong> — <strong>16 of 26</strong> events happened at normal terminal voltage (240&ndash;249&nbsp;V), and the two <em>lowest</em> readings on record (212&nbsp;V) produced no event</li>
           <li class="is-out"><strong>Inverter commanding a contactor open</strong> — DO1/DO2 never change state in 864 intervals</li>
           <li class="is-live"><strong>Still live:</strong> an inverter-side internal trip, <em>or</em> an intermittent fault in K2's coil circuit, aux contact or isolator. <strong>These two look identical in every monitoring channel.</strong></li>
         </ul>
@@ -1223,7 +1223,7 @@ body {
             <tr><td>Grid frequency excursion</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — flat 49.93–50.03 Hz, identical to S1</td></tr>
             <tr><td>Battery state</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — events at SOC 7% through 99%</td></tr>
             <tr><td>Output level / clipping</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — event output matches normal</td></tr>
-            <tr><td>Simple undervoltage trip</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — 217 V reached on 1 Aug with no disconnection</td></tr>
+            <tr><td>Simple undervoltage trip</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — neither necessary nor sufficient: <strong>16 of 26</strong> events occurred at 240&ndash;249 V, and the two lowest readings in the record (211.6, 211.9 V) produced no event. Only 9 of 20 samples below 225 V are events</td></tr>
             <tr><td>Inverter commanding contactor open</td><td style="text-align:left;color:var(--c-good)"><strong>Ruled out</strong> — DO1/DO2 never change state in 864 intervals</td></tr>
             <tr class="tbl__row--hi"><td><strong>Inverter internal trip</strong></td><td style="text-align:left"><strong>LIVE</strong></td></tr>
             <tr class="tbl__row--hi"><td><strong>Contactor circuit fault</strong></td><td style="text-align:left"><strong>LIVE</strong> — coil, aux contact or isolator</td></tr>
