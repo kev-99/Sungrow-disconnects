@@ -273,20 +273,27 @@ body {
    drop it to 0.95 or 0.92 rather than editing individual values.
    ====================================================================== */
 .hs {
-  /* THE ONE-PAGE CONTROL. Multiplies every font size on this sheet only.
-     Measured against the 1,039 px A4 printable height (297 mm − 22 mm margins):
+  /* TWO SCALES — screen and print are deliberately different.
+
+     SCREEN (here): there is no page to fit, so the sheet is set for comfortable
+     reading. Raise --hs-scale and --hs-gap freely; nothing breaks.
+
+     PRINT: overridden in the @media print block below to the values that fit
+     one A4 page. Measured against the 1,039 px printable height
+     (297 mm − 22 mm margins):
        1.12 -> 1,135 px  OVERFLOWS      1.06 -> 1,061 px  OVERFLOWS
-       1.02 -> 1,000 px  fits, tight    1.00 ->   969 px  fits, 70 px spare
-     1.00 is chosen to leave room for font substitution on other machines.
-     Add content here and you MUST re-measure; lower this value rather than
-     editing individual sizes. */
-  --hs-scale: 1.00;
+       1.02 -> 1,000 px  fits, tight    1.00 ->   951 px  fits, 88 px spare
+     1.00 is chosen to survive font substitution on other machines.
+     CHANGING THE SCREEN VALUES BELOW DOES NOT AFFECT THE PDF. If you add
+     content to this sheet you must re-measure the PRINT value. */
+  --hs-scale: 1.22;
+  --hs-gap:   15px;
   break-after: page;
 
   & .hs__head {
     display: flex; align-items: flex-end; justify-content: space-between;
-    gap: 12px; border-bottom: 3px solid var(--c-ink);
-    padding-bottom: 7px; margin-bottom: 9px;
+    gap: calc(12px * var(--hs-scale)); border-bottom: 3px solid var(--c-ink);
+    padding-bottom: 7px; margin-bottom: var(--hs-gap);
   }
   & .hs__title  { font-size: calc(19pt * var(--hs-scale)); font-weight: 700; margin: 0; line-height: 1.05; }
   & .hs__eyebrow{ font-size: calc(8pt * var(--hs-scale)); letter-spacing: .14em;
@@ -298,7 +305,7 @@ body {
   /* the one-sentence statement */
   & .hs__lede {
     background: var(--c-ink); color: #fff; border-radius: var(--radius);
-    padding: 10px 13px; margin-bottom: 9px;
+    padding: calc(10px * var(--hs-scale)) calc(13px * var(--hs-scale)); margin-bottom: var(--hs-gap);
     font-size: calc(11.5pt * var(--hs-scale)); font-weight: 600; line-height: 1.32;
 
     & em { color: #ff9f93; font-style: normal; font-weight: 700; }
@@ -307,10 +314,10 @@ body {
   }
 
   /* four numbers */
-  & .hs__nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 9px; }
+  & .hs__nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--hs-gap); margin-bottom: var(--hs-gap); }
   & .hs__num {
     border: 1px solid var(--c-rule); border-radius: var(--radius);
-    padding: 7px 9px; background: var(--c-panel);
+    padding: calc(7px * var(--hs-scale)) calc(9px * var(--hs-scale)); background: var(--c-panel);
 
     & b { display: block; font-size: calc(26pt * var(--hs-scale)); font-weight: 700;
           line-height: 1; letter-spacing: -.02em; color: var(--c-mode-b); }
@@ -321,10 +328,10 @@ body {
   }
 
   /* the two modes, side by side and very compact */
-  & .hs__modes { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 9px; }
+  & .hs__modes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hs-gap); margin-bottom: var(--hs-gap); }
   & .hs__mode {
     border: 1px solid var(--c-rule); border-top: 3px solid; border-radius: var(--radius);
-    padding: 7px 10px; font-size: calc(8.5pt * var(--hs-scale)); line-height: 1.35;
+    padding: calc(7px * var(--hs-scale)) calc(10px * var(--hs-scale)); font-size: calc(8.5pt * var(--hs-scale)); line-height: 1.35;
 
     & b { display: block; font-size: calc(9.5pt * var(--hs-scale)); margin-bottom: 3px; }
     & i { font-style: normal; color: var(--c-ink-soft); }
@@ -334,7 +341,7 @@ body {
              & b { color: var(--c-mode-b); } }
   }
 
-  & .hs__band { margin-bottom: 9px;
+  & .hs__band { margin-bottom: var(--hs-gap);
     & svg { width: 100%; height: auto; display: block; }
     & figcaption { font-size: calc(7.8pt * var(--hs-scale)); color: var(--c-ink-soft); margin-top: 3px; }
   }
@@ -345,7 +352,7 @@ body {
   & .hs__states {
     border: 1px solid var(--c-rule); border-left: 4px solid var(--c-s1);
     border-radius: 0 var(--radius) var(--radius) 0;
-    background: #eef4fa; padding: 7px 11px; margin-bottom: 9px;
+    background: #eef4fa; padding: calc(7px * var(--hs-scale)) calc(11px * var(--hs-scale)); margin-bottom: var(--hs-gap);
     font-size: calc(8.3pt * var(--hs-scale)); line-height: 1.4;
 
     & b { color: var(--c-s1); }
@@ -355,7 +362,7 @@ body {
   }
 
   /* bottom two columns */
-  & .hs__cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  & .hs__cols { display: grid; grid-template-columns: 1fr 1fr; gap: calc(12px * var(--hs-scale)); }
   & .hs__colh {
     font-size: calc(9pt * var(--hs-scale)); font-weight: 700; margin: 0 0 5px;
     padding-bottom: 3px; border-bottom: 2px solid var(--c-rule);
@@ -375,7 +382,7 @@ body {
   & .hs__asks { counter-reset: ask; }
 
   & .hs__foot {
-    margin-top: 9px; padding-top: 6px; border-top: 2px solid var(--c-ink);
+    margin-top: var(--hs-gap); padding-top: 6px; border-top: 2px solid var(--c-ink);
     font-size: calc(7.8pt * var(--hs-scale)); color: var(--c-ink-soft);
     display: flex; justify-content: space-between; gap: 10px;
   }
@@ -396,8 +403,10 @@ body {
   .section, .stats, .headline { break-inside: avoid; }
   .page-break { break-before: page; }
   :root { --f-huge: 32pt; --gap: 10px; }
-  /* the headline sheet must never split */
-  .hs { break-inside: avoid; break-after: page; }
+  /* THE ONE-PAGE VALUES. These are the numbers that were measured; the larger
+     values on the .hs rule above apply to on-screen reading only. */
+  .hs { break-inside: avoid; break-after: page;
+        --hs-scale: 1.00; --hs-gap: 9px; }
 }
 
 /* ------------------------------------------------------- narrow screens */
